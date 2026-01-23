@@ -297,12 +297,18 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
   submitEventMarker () {
     if (!this.video?.isLive || !this.isUserOwner()) return
 
-    let timecode = Math.floor(this.peertubePlayer?.getPlayer()?.currentTime?.() || 0)
+    const player = this.peertubePlayer?.getPlayer()
+    const currentTime = Math.floor(player?.currentTime?.() || 0)
+    let timecode = currentTime
 
-    if (this.videoEventMarkersLiveStartAt) {
+    if (this.videoEventMarkersLiveStartAt && player) {
       const liveStartMs = new Date(this.videoEventMarkersLiveStartAt).getTime()
-      if (!isNaN(liveStartMs)) {
-        timecode = Math.max(0, Math.floor((Date.now() - liveStartMs) / 1000))
+      const duration = player.duration?.()
+
+      if (!isNaN(liveStartMs) && !isNaN(duration) && duration > 0) {
+        const liveEdgeSeconds = (Date.now() - liveStartMs) / 1000
+        const windowStart = Math.max(0, liveEdgeSeconds - duration)
+        timecode = Math.max(0, Math.floor(windowStart + currentTime))
       }
     }
 
