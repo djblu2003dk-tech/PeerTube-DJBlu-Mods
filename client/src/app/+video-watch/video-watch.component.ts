@@ -271,7 +271,7 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
 
   @HostListener('window:keydown', [ '$event' ])
   onWindowKeyDown (event: KeyboardEvent) {
-    if (!this.video?.isLive || !this.isUserOwner()) return
+    if (!this.video || !this.isUserOwner()) return
 
     const target = event.target as HTMLElement
     const tagName = target?.tagName?.toLowerCase()
@@ -299,7 +299,7 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
   }
 
   submitEventMarker () {
-    if (!this.video?.isLive || !this.isUserOwner()) return
+    if (!this.video || !this.isUserOwner()) return
 
     const timecode = this.getEventMarkerTimecodeFromPlayer()
 
