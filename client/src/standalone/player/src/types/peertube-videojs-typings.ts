@@ -41,6 +41,16 @@ import { StatsForNerdsPlugin } from '../shared/stats/stats-plugin'
 import { UpNextPlugin } from '../shared/upnext/upnext-plugin'
 import { WebVideoPlugin } from '../shared/web-video/web-video-plugin'
 
+declare module '@silvermine/videojs-chromecast' {
+  const register: (videojs?: any, options?: any) => void
+  export default register
+}
+
+declare module '@silvermine/videojs-airplay' {
+  const register: (videojs?: any, options?: any) => void
+  export default register
+}
+
 declare module 'video.js' {
   export interface VideoJsPlayer {
     // FIXME: add it to upstream typings
