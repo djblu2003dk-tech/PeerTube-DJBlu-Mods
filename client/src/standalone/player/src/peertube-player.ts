@@ -309,7 +309,20 @@ export class PeerTubePlayer {
             const castSource = this.getCastSource()
             if (castSource) {
               request.media.contentId = castSource.src
-              request.media.contentType = castSource.type
+              // Chromecast is picky about HLS mime types and segment formats
+              if (castSource.type === 'application/x-mpegURL') {
+                request.media.contentType = 'application/vnd.apple.mpegurl'
+
+                const media = request.media as any
+                const chromeAny = (window as any).chrome
+                const hlsSegmentFormat = chromeAny?.cast?.media?.HlsSegmentFormat
+                const hlsVideoSegmentFormat = chromeAny?.cast?.media?.HlsVideoSegmentFormat
+
+                if (hlsSegmentFormat?.TS) media.hlsSegmentFormat = hlsSegmentFormat.TS
+                if (hlsVideoSegmentFormat?.TS) media.hlsVideoSegmentFormat = hlsVideoSegmentFormat.TS
+              } else {
+                request.media.contentType = castSource.type
+              }
             }
 
             if (this.currentLoadOptions?.isLive) {
@@ -317,6 +330,16 @@ export class PeerTubePlayer {
                 // Ensure Live stream type for Chromecast
                 request.media.streamType = (window as any)?.chrome?.cast?.media?.StreamType?.LIVE ?? request.media.streamType
               } catch {}
+            }
+
+            if ((window as any)?.console?.debug) {
+              console.debug('Chromecast load request', {
+                contentId: request?.media?.contentId,
+                contentType: request?.media?.contentType,
+                streamType: request?.media?.streamType,
+                hlsSegmentFormat: (request as any)?.media?.hlsSegmentFormat,
+                hlsVideoSegmentFormat: (request as any)?.media?.hlsVideoSegmentFormat
+              })
             }
 
             return request
