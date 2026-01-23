@@ -67,41 +67,53 @@ $event-marker-size: 14px;
 }
 
 .vjs-event-marker-goal {
-  background-color: #fff;
-  mask-image: url("./svg/event-ball.svg");
-  -webkit-mask-image: url("./svg/event-ball.svg");
+  background-color: transparent;
+  background-image: url("./png/goal.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  mask-image: none;
+  -webkit-mask-image: none;
 }
 
-.vjs-event-marker-kickoff {
-  background-color: #fff;
-  mask-image: url("./svg/event-whistle.svg");
-  -webkit-mask-image: url("./svg/event-whistle.svg");
+.vjs-event-marker-kickoff,
+.vjs-event-marker-penalty {
+  background-color: transparent;
+  background-image: url("./png/whistle.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  mask-image: none;
+  -webkit-mask-image: none;
 }
 
 .vjs-event-marker-half-time,
 .vjs-event-marker-full-time {
-  background-color: #fff;
-  mask-image: url("./svg/event-clock.svg");
-  -webkit-mask-image: url("./svg/event-clock.svg");
-}
-
-.vjs-event-marker-penalty,
-.vjs-event-marker-penalty {
-  background-color: #fff;
-  mask-image: url("./svg/event-flag.svg");
-  -webkit-mask-image: url("./svg/event-flag.svg");
+  background-color: transparent;
+  background-image: url("./png/clock.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  mask-image: none;
+  -webkit-mask-image: none;
 }
 
 .vjs-event-marker-yellow-card {
-  background-color: #f1c40f;
-  border-radius: 2px;
+  background-color: transparent;
+  background-image: url("./png/yellow.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   mask-image: none;
   -webkit-mask-image: none;
 }
 
 .vjs-event-marker-red-card {
-  background-color: #e74c3c;
-  border-radius: 2px;
+  background-color: transparent;
+  background-image: url("./png/red.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   mask-image: none;
   -webkit-mask-image: none;
 }
