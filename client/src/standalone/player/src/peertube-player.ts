@@ -327,6 +327,11 @@ export class PeerTubePlayer {
   }
 
   private getCastSource () {
+    if (this.currentLoadOptions?.isLive) {
+      const liveHlsUrl = this.currentLoadOptions?.hls?.playlistUrl
+      if (liveHlsUrl) return { src: liveHlsUrl, type: 'application/x-mpegURL' }
+    }
+
     const files = this.currentLoadOptions?.castVideoFiles || []
     if (files.length > 0) {
       const sorted = [ ...files ].sort((a, b) => (a.resolution?.id || 0) - (b.resolution?.id || 0))
