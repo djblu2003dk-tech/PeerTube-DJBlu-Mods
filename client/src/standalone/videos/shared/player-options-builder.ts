@@ -311,6 +311,7 @@ export class PlayerOptionsBuilder {
       videoChapters: chapters,
       videoEventMarkers: eventMarkersResult.markers,
       videoEventMarkersLiveStartAt: eventMarkersResult.liveStartAt,
+      castVideoFiles: video.files,
 
       startTime: playlist
         ? playlist.playlistTracker.getCurrentElement().startTimestamp

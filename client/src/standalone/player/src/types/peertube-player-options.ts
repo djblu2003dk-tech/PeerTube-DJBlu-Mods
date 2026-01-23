@@ -84,6 +84,7 @@ export type PeerTubePlayerLoadOptions = {
   videoEventMarkers?: VideoEventMarker[]
   videoEventMarkersLiveStartAt?: string
   storyboard: VideoJSStoryboard
+  castVideoFiles?: VideoFile[]
 
   videoUUID: string
   videoShortUUID: string

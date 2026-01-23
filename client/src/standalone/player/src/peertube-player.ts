@@ -303,7 +303,17 @@ export class PeerTubePlayer {
       if (this.player.chromecast) {
         this.player.chromecast({
           addButtonToControlBar: false,
-          buttonPositionIndex: -2
+          buttonPositionIndex: -2,
+          requestTitleFn: () => this.currentLoadOptions?.embedTitle || '',
+          modifyLoadRequestFn: request => {
+            const castSource = this.getCastSource()
+            if (castSource) {
+              request.media.contentId = castSource.src
+              request.media.contentType = castSource.type
+            }
+
+            return request
+          }
         })
       }
     }
@@ -314,6 +324,23 @@ export class PeerTubePlayer {
         buttonPositionIndex: -2
       })
     }
+  }
+
+  private getCastSource () {
+    const files = this.currentLoadOptions?.castVideoFiles || []
+    if (files.length > 0) {
+      const sorted = [ ...files ].sort((a, b) => (a.resolution?.id || 0) - (b.resolution?.id || 0))
+      const file = sorted[sorted.length - 1]
+
+      if (file?.fileUrl) {
+        return { src: file.fileUrl, type: 'video/mp4' }
+      }
+    }
+
+    const hlsUrl = this.currentLoadOptions?.hls?.playlistUrl
+    if (hlsUrl) return { src: hlsUrl, type: 'application/x-mpegURL' }
+
+    return null
   }
 
   private disposeDynamicPluginsIfNeeded () {
