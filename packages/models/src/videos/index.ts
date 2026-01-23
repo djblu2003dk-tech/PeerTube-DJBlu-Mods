@@ -13,6 +13,7 @@ export * from './stats/index.js'
 export * from './transcoding/index.js'
 export * from './channel-sync/index.js'
 export * from './chapter/index.js'
+export * from './event-marker/index.js'
 
 export * from './nsfw-flag.enum.js'
 export * from './nsfw-policy.type.js'

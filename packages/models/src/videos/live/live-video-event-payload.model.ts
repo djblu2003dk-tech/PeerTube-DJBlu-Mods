@@ -4,4 +4,6 @@ export interface LiveVideoEventPayload {
   state?: VideoStateType
 
   viewers?: number
+
+  eventMarkersUpdated?: boolean
 }

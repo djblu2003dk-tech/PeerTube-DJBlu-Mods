@@ -10,6 +10,7 @@ import {
   VideoCaption,
   VideoChapter,
   VideoDetails,
+  VideoEventMarker,
   VideoPlaylistElement,
   VideoState,
   VideoStreamingPlaylistType
@@ -56,6 +57,7 @@ export class PlayerOptionsBuilder {
   private bigPlayBackgroundColor: string
   private foregroundColor: string
   private playerTheme: PlayerTheme
+  private contextMenu = true
 
   private waitPasswordFromEmbedAPI = false
 
@@ -136,6 +138,7 @@ export class PlayerOptionsBuilder {
       this.waitPasswordFromEmbedAPI = getParamToggle(params, 'waitPasswordFromEmbedAPI', this.waitPasswordFromEmbedAPI)
       this.warningTitle = getParamToggle(params, 'warningTitle', true)
       this.peertubeLink = getParamToggle(params, 'peertubeLink', true)
+      this.contextMenu = getParamToggle(params, 'contextMenu', true)
 
       this.scope = getParamString(params, 'scope', this.scope)
       this.subtitle = getParamString(params, 'subtitle')
@@ -214,7 +217,10 @@ export class PlayerOptionsBuilder {
       instanceName: serverConfig.instance.name,
 
       theaterButton: false,
-      popoutButton: false,
+      popoutButton: true,
+      eventMarkersToggleButton: () => true,
+      eventMarkersToggleButtonDefaultHidden: () => true,
+      contextMenu: this.contextMenu,
 
       serverUrl: getBackendUrl(),
       stunServers: serverConfig.webrtc.stunServers,
@@ -235,6 +241,7 @@ export class PlayerOptionsBuilder {
     storyboardsResponse: Response
 
     chaptersResponse: Response
+    eventMarkersResponse: Response
 
     playerSettingsResponse: Response
 
@@ -271,14 +278,16 @@ export class PlayerOptionsBuilder {
       live,
       storyboardsResponse,
       chaptersResponse,
+      eventMarkersResponse,
       config,
       playerSettingsResponse
     } = options
 
-    const [ videoCaptions, storyboard, chapters, playerSettings ] = await Promise.all([
+    const [ videoCaptions, storyboard, chapters, eventMarkersResult, playerSettings ] = await Promise.all([
       this.buildCaptions(captionsResponse, translations),
       this.buildStoryboard(storyboardsResponse),
       this.buildChapters(chaptersResponse),
+      this.buildEventMarkers(eventMarkersResponse),
       playerSettingsResponse.json() as Promise<PlayerVideoSettings>
     ])
 
@@ -298,6 +307,8 @@ export class PlayerOptionsBuilder {
 
       storyboard,
       videoChapters: chapters,
+      videoEventMarkers: eventMarkersResult.markers,
+      videoEventMarkersLiveStartAt: eventMarkersResult.liveStartAt,
 
       startTime: playlist
         ? playlist.playlistTracker.getCurrentElement().startTimestamp
@@ -378,6 +389,12 @@ export class PlayerOptionsBuilder {
     const { chapters } = await chaptersResponse.json() as { chapters: VideoChapter[] }
 
     return chapters
+  }
+
+  private async buildEventMarkers (eventMarkersResponse: Response) {
+    const { markers, liveStartAt } = await eventMarkersResponse.json() as { markers: VideoEventMarker[], liveStartAt?: string }
+
+    return { markers, liveStartAt }
   }
 
   private buildPlaylistOptions (options?: {

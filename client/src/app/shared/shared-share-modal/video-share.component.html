@@ -353,6 +353,15 @@
 
               <div class="form-group">
                 <my-peertube-checkbox
+                  inputName="contextMenu"
+                  [(ngModel)]="customizations.contextMenu"
+                  i18n-labelText
+                  labelText="Enable right click menu"
+                ></my-peertube-checkbox>
+              </div>
+
+              <div class="form-group">
+                <my-peertube-checkbox
                   inputName="peertubeLink"
                   [(ngModel)]="customizations.peertubeLink"
                   i18n-labelText

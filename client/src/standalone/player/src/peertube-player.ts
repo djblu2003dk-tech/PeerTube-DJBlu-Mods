@@ -11,6 +11,8 @@ import './shared/bezels/bezels-plugin'
 import './shared/context-menu'
 import './shared/control-bar/caption-toggle-button'
 import './shared/control-bar/chapters-plugin'
+import './shared/control-bar/event-markers-plugin'
+import './shared/control-bar/event-markers-toggle-button'
 import './shared/control-bar/next-previous-video-button'
 import './shared/control-bar/p2p-info-button'
 import './shared/control-bar/peertube-link-button'
@@ -263,8 +265,8 @@ export class PeerTubePlayer {
         saveAverageBandwidth(Math.floor(data.bandwidthEstimate))
       })
 
-      if (this.isInIframe()) {
-        // Disable custom and native context menus in embeds.
+      if (this.options.contextMenu === false) {
+        // Disable custom and native context menus.
         this.player.on('contextmenu', (event: Event) => {
           event.preventDefault()
           event.stopPropagation()
@@ -288,6 +290,7 @@ export class PeerTubePlayer {
     if (this.player.usingPlugin('stats')) this.player.stats().dispose()
     if (this.player.usingPlugin('storyboard')) this.player.storyboard().dispose()
     if (this.player.usingPlugin('chapters')) this.player.chapters().dispose()
+    if (this.player.usingPlugin('eventMarkers')) this.player.eventMarkers().dispose()
     if (this.player.usingPlugin('peertubeNSFW')) this.player.peertubeNSFW().dispose()
 
     if (this.player.usingPlugin('peertubeDock')) this.player.peertubeDock().dispose()
@@ -340,6 +343,15 @@ export class PeerTubePlayer {
 
     if (this.currentLoadOptions.videoChapters) {
       this.player.chapters({ chapters: this.currentLoadOptions.videoChapters })
+    }
+
+    if (this.currentLoadOptions.videoEventMarkers) {
+      this.player.eventMarkers({
+        markers: this.currentLoadOptions.videoEventMarkers,
+        liveStartAt: this.currentLoadOptions.videoEventMarkersLiveStartAt,
+        isLive: this.currentLoadOptions.isLive,
+        isLiveDvr: this.currentLoadOptions.isLiveDvr
+      })
     }
 
     if (this.currentLoadOptions.dock) {
@@ -450,6 +462,8 @@ export class PeerTubePlayer {
       videoShortUUID: () => this.currentLoadOptions.videoShortUUID,
       p2pEnabled: () => this.currentLoadOptions.p2pEnabled,
       embedUrl: () => this.currentLoadOptions.embedUrl,
+      eventMarkersToggleButton: () => this.options.eventMarkersToggleButton(),
+      eventMarkersToggleButtonDefaultHidden: () => this.options.eventMarkersToggleButtonDefaultHidden?.() ?? false,
 
       nextVideo: () => this.currentLoadOptions.nextVideo,
       previousVideo: () => this.currentLoadOptions.previousVideo
@@ -649,11 +663,4 @@ export class PeerTubePlayer {
     return { content }
   }
 
-  private isInIframe () {
-    try {
-      return window.self !== window.top
-    } catch {
-      return true
-    }
-  }
 }

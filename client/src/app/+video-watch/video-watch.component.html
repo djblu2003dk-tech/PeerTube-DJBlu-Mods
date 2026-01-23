@@ -14,6 +14,35 @@
         <video #playerElement class="video-js vjs-peertube-skin" playsinline="true"></video>
       </div>
 
+      @if (eventMarkerPanelOpen) {
+        <div class="event-marker-panel">
+          <div class="event-marker-panel-title" i18n>Add event marker</div>
+
+          <div class="event-marker-panel-row">
+            <select class="form-control" [(ngModel)]="eventMarkerType">
+              @for (t of eventMarkerTypes; track t.id) {
+                <option [value]="t.id">{{ t.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="event-marker-panel-row">
+            <input
+              class="form-control"
+              [(ngModel)]="eventMarkerLabel"
+              i18n-placeholder
+              placeholder="Tooltip text (optional)"
+              type="text"
+            />
+          </div>
+
+          <div class="event-marker-panel-actions">
+            <button class="btn btn-primary" type="button" (click)="submitEventMarker()" i18n>Add</button>
+            <button class="btn btn-outline-light" type="button" (click)="closeEventMarkerPanel()" i18n>Cancel</button>
+          </div>
+        </div>
+      }
+
       <div class="player-widget-component">
         <my-video-watch-playlist
           #videoWatchPlaylist [playlist]="playlist"

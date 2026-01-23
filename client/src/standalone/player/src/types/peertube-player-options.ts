@@ -1,4 +1,4 @@
-import { LiveVideoLatencyModeType, PlayerMode, PlayerTheme, VideoChapter, VideoFile } from '@peertube/peertube-models'
+import { LiveVideoLatencyModeType, PlayerMode, PlayerTheme, VideoChapter, VideoEventMarker, VideoFile } from '@peertube/peertube-models'
 import { PluginsManager } from '@root-helpers/plugins-manager'
 import { PeerTubeDockPluginOptions } from '../shared/dock/peertube-dock-plugin'
 import { PlaylistPluginOptions, VideoJSCaption, VideojsPlayer, VideoJSStoryboard } from './peertube-videojs-typings'
@@ -25,6 +25,9 @@ export type PeerTubePlayerConstructorOptions = {
 
   theaterButton: boolean
   popoutButton: boolean
+  eventMarkersToggleButton: () => boolean
+  eventMarkersToggleButtonDefaultHidden?: () => boolean
+  contextMenu: boolean
 
   authorizationHeader: () => string
 
@@ -76,6 +79,8 @@ export type PeerTubePlayerLoadOptions = {
 
   videoCaptions: VideoJSCaption[]
   videoChapters: VideoChapter[]
+  videoEventMarkers?: VideoEventMarker[]
+  videoEventMarkersLiveStartAt?: string
   storyboard: VideoJSStoryboard
 
   videoUUID: string

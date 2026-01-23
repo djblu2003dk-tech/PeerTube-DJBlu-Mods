@@ -90,6 +90,12 @@ export class VideoManageMenuComponent implements OnInit {
           icon: 'chapters',
           routerLink: 'chapters'
         },
+        {
+          type: 'link',
+          label: $localize`Event markers`,
+          icon: 'chapters',
+          routerLink: 'event-markers'
+        },
 
         {
           type: 'separator'

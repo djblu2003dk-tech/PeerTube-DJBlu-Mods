@@ -1,5 +1,7 @@
 export * from './caption-toggle-button'
 export * from './chapters-plugin'
+export * from './event-markers-plugin'
+export * from './event-markers-toggle-button'
 export * from './next-previous-video-button'
 export * from './p2p-info-button'
 export * from './peertube-link-button'

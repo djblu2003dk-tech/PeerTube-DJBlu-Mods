@@ -7,6 +7,7 @@
 $slider-height: 3px;
 $slider-hover-height: 5px;
 $chapter-marker-size: 9px;
+$event-marker-size: 14px;
 
 .vjs-peertube-skin.has-chapter {
   .vjs-time-tooltip {
@@ -39,6 +40,70 @@ $chapter-marker-size: 9px;
 
     border-color: pvar(--primary);
   }
+}
+
+.vjs-event-marker {
+  position: absolute;
+  top: math.floor(math.div($event-marker-size - $slider-height, 2)) * -1;
+  height: $event-marker-size;
+  width: $event-marker-size;
+  border-radius: $event-marker-size;
+  margin-left: math.div($event-marker-size, 2) * -1;
+  background-color: #fff;
+  cursor: pointer;
+  z-index: 102;
+  mask-size: cover;
+  -webkit-mask-size: cover;
+  mask-position: center;
+  -webkit-mask-position: center;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
+
+.vjs-event-markers-hidden {
+  .vjs-event-marker {
+    display: none !important;
+  }
+}
+
+.vjs-event-marker-goal {
+  background-color: #fff;
+  mask-image: url("./svg/event-ball.svg");
+  -webkit-mask-image: url("./svg/event-ball.svg");
+}
+
+.vjs-event-marker-kickoff {
+  background-color: #fff;
+  mask-image: url("./svg/event-whistle.svg");
+  -webkit-mask-image: url("./svg/event-whistle.svg");
+}
+
+.vjs-event-marker-half-time,
+.vjs-event-marker-full-time {
+  background-color: #fff;
+  mask-image: url("./svg/event-clock.svg");
+  -webkit-mask-image: url("./svg/event-clock.svg");
+}
+
+.vjs-event-marker-penalty,
+.vjs-event-marker-penalty {
+  background-color: #fff;
+  mask-image: url("./svg/event-flag.svg");
+  -webkit-mask-image: url("./svg/event-flag.svg");
+}
+
+.vjs-event-marker-yellow-card {
+  background-color: #f1c40f;
+  border-radius: 2px;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
+.vjs-event-marker-red-card {
+  background-color: #e74c3c;
+  border-radius: 2px;
+  mask-image: none;
+  -webkit-mask-image: none;
 }
 
 .video-js.vjs-peertube-skin .vjs-control-bar {
@@ -82,6 +147,7 @@ $chapter-marker-size: 9px;
   .vjs-peertube-link,
   .vjs-popout-control,
   .vjs-theater-control,
+  .vjs-event-markers-toggle,
   .vjs-caption-toggle-control,
   .vjs-settings {
     color: pvar(--pt-player-fg);
@@ -274,6 +340,29 @@ $chapter-marker-size: 9px;
       -webkit-mask-position: center;
       mask-repeat: no-repeat;
       -webkit-mask-repeat: no-repeat;
+    }
+  }
+
+  .vjs-event-markers-toggle {
+    width: var(--button-width);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @include disable-outline;
+
+    .vjs-icon-placeholder {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #27ae60;
+    }
+  }
+
+  .vjs-event-markers-toggle.vjs-event-markers-toggle-off {
+    .vjs-icon-placeholder {
+      background-color: #e74c3c;
     }
   }
 

@@ -1,0 +1,45 @@
+<div class="video-manage-page">
+  <div class="pt-title" i18n>Event markers</div>
+
+  <div class="event-marker-form">
+    <div class="event-marker-row">
+      <label i18n>Type</label>
+      <select class="form-control" [(ngModel)]="newMarkerType">
+        @for (t of eventMarkerTypes; track t.id) {
+          <option [value]="t.id">{{ t.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="event-marker-row">
+      <label i18n>Timecode</label>
+      <my-timestamp-input [(ngModel)]="newMarkerTimecode"></my-timestamp-input>
+    </div>
+
+    <div class="event-marker-row">
+      <label i18n>Tooltip</label>
+      <input class="form-control" [(ngModel)]="newMarkerLabel" type="text" i18n-placeholder placeholder="Optional tooltip text" />
+    </div>
+
+    <div class="event-marker-actions">
+      <button class="btn btn-primary" type="button" (click)="addMarker()" i18n>Add marker</button>
+    </div>
+  </div>
+
+  <div class="event-marker-list">
+    @if (markers.length === 0) {
+      <div class="event-marker-empty" i18n>No event markers yet.</div>
+    } @else {
+      <div class="event-marker-item" *ngFor="let marker of markers">
+        <div class="event-marker-item-left">
+          <span class="event-marker-type">{{ marker.type }}</span>
+          <span class="event-marker-time">{{ marker.timecode | myTimeDurationFormatter }}</span>
+          @if (marker.label) {
+            <span class="event-marker-label">{{ marker.label }}</span>
+          }
+        </div>
+        <my-delete-button (onDelete)="deleteMarker(marker)"></my-delete-button>
+      </div>
+    }
+  </div>
+</div>

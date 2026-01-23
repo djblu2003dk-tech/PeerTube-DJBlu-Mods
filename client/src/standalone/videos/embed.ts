@@ -53,6 +53,7 @@ export class PeerTubeEmbed {
 
   private alreadyInitialized = false
   private alreadyPlayed = false
+  private eventMarkersPollIntervalId: any
 
   private videoPassword: string
   private videoPasswordFromAPI: string
@@ -220,6 +221,7 @@ export class PeerTubeEmbed {
         videoResponse,
         captionsPromise,
         chaptersPromise,
+        eventMarkersPromise,
         storyboardsPromise,
         playerSettingsPromise
       } = await this.videoFetcher.loadVideo({ videoId: uuid, videoPassword: this.videoPassword })
@@ -228,6 +230,7 @@ export class PeerTubeEmbed {
         videoResponse,
         captionsPromise,
         chaptersPromise,
+        eventMarkersPromise,
         storyboardsPromise,
         playerSettingsPromise,
         forceAutoplay
@@ -243,10 +246,11 @@ export class PeerTubeEmbed {
     storyboardsPromise: Promise<Response>
     captionsPromise: Promise<Response>
     chaptersPromise: Promise<Response>
+    eventMarkersPromise: Promise<Response>
     playerSettingsPromise: Promise<Response>
     forceAutoplay: boolean
   }) {
-    const { videoResponse, captionsPromise, chaptersPromise, storyboardsPromise, playerSettingsPromise, forceAutoplay } = options
+    const { videoResponse, captionsPromise, chaptersPromise, eventMarkersPromise, storyboardsPromise, playerSettingsPromise, forceAutoplay } = options
 
     const videoInfoPromise = videoResponse.json()
       .then(async (videoInfo: VideoDetails) => {
@@ -268,6 +272,7 @@ export class PeerTubeEmbed {
       translations,
       captionsResponse,
       chaptersResponse,
+      eventMarkersResponse,
       storyboardsResponse,
       playerSettingsResponse
     ] = await Promise.all([
@@ -275,6 +280,7 @@ export class PeerTubeEmbed {
       this.translationsPromise,
       captionsPromise,
       chaptersPromise,
+      eventMarkersPromise,
       storyboardsPromise,
       playerSettingsPromise,
       this.buildPlayerIfNeeded()
@@ -294,6 +300,7 @@ export class PeerTubeEmbed {
       video,
       captionsResponse,
       chaptersResponse,
+      eventMarkersResponse,
       playerSettingsResponse,
 
       config: this.config,
@@ -339,8 +346,11 @@ export class PeerTubeEmbed {
           this.loadVideoAndBuildPlayer({ uuid: video.uuid, forceAutoplay: true })
         },
 
-        onForceEnd: () => this.endLive(video, translations)
+        onForceEnd: () => this.endLive(video, translations),
+        onEventMarkersUpdated: () => this.refreshEventMarkers(video)
       })
+
+      this.startEventMarkersPolling(video)
 
       if (video.state.id === VideoState.WAITING_FOR_LIVE || video.state.id === VideoState.LIVE_ENDED) {
         this.liveManager.displayInfo({ state: video.state.id, translations })
@@ -355,6 +365,41 @@ export class PeerTubeEmbed {
       undefined,
       { player: this.player, videojs: this.videojs, video }
     )
+  }
+
+  private async refreshEventMarkers (video: VideoDetails) {
+    try {
+      const response = await this.videoFetcher.loadVideoEventMarkers({ videoId: video.uuid, videoPassword: this.videoPassword })
+      const { markers, liveStartAt } = await response.json()
+
+      const player = this.peertubePlayer?.getPlayer()
+      if (player?.usingPlugin('eventMarkers')) {
+        const isLiveDvr = player.el()?.classList?.contains('vjs-live-dvr') === true
+        player.eventMarkers().setMarkers({
+          markers,
+          liveStartAt,
+          isLive: video.isLive,
+          isLiveDvr
+        })
+      }
+    } catch {
+      // Ignore refresh errors.
+    }
+  }
+
+  private startEventMarkersPolling (video: VideoDetails) {
+    if (this.eventMarkersPollIntervalId) return
+
+    this.eventMarkersPollIntervalId = setInterval(() => {
+      void this.refreshEventMarkers(video)
+    }, 10_000)
+  }
+
+  private stopEventMarkersPolling () {
+    if (!this.eventMarkersPollIntervalId) return
+
+    clearInterval(this.eventMarkersPollIntervalId)
+    this.eventMarkersPollIntervalId = null
   }
 
   private buildCSS () {
@@ -395,6 +440,8 @@ export class PeerTubeEmbed {
   private endLive (video: VideoDetails, translations: Translations) {
     // Display the live ended information
     this.liveManager.displayInfo({ state: VideoState.LIVE_ENDED, translations })
+
+    this.stopEventMarkersPolling()
 
     this.peertubePlayer.unload()
     this.peertubePlayer.disable()

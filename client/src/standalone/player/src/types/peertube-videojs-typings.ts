@@ -1,4 +1,4 @@
-import { PlayerMode, VideoChapter, VideoFile, VideoPlaylist, VideoPlaylistElement } from '@peertube/peertube-models'
+import { PlayerMode, VideoChapter, VideoEventMarker, VideoFile, VideoPlaylist, VideoPlaylistElement } from '@peertube/peertube-models'
 import type { HlsConfig, Level, Loader, LoaderContext } from 'hls.js'
 import type { CoreConfig } from 'p2p-media-loader-core'
 import type { HlsJsP2PEngine } from 'p2p-media-loader-hlsjs'
@@ -22,6 +22,7 @@ import Tech from 'video.js/dist/types/tech/tech'
 import { BezelsPlugin } from '../shared/bezels/bezels-plugin'
 import { ContextMenuPlugin } from '../shared/context-menu'
 import { ChaptersPlugin } from '../shared/control-bar/chapters-plugin'
+import { EventMarkersPlugin } from '../shared/control-bar/event-markers-plugin'
 import { StoryboardPlugin } from '../shared/control-bar/storyboard-plugin'
 import { PeerTubeDockPlugin, PeerTubeDockPluginOptions } from '../shared/dock/peertube-dock-plugin'
 import { HotkeysOptions, PeerTubeHotkeysPlugin } from '../shared/hotkeys/peertube-hotkeys-plugin'
@@ -148,6 +149,12 @@ export type ChaptersOptions = {
   chapters: VideoChapter[]
 }
 
+export type EventMarkersOptions = {
+  markers: VideoEventMarker[]
+  liveStartAt?: string
+  isLive: boolean
+  isLiveDvr: boolean
+}
 export type PlaylistPluginOptions = {
   elements: VideoPlaylistElement[]
 
@@ -169,6 +176,11 @@ export type UpNextPluginOptions = {
 
 export type ProgressBarMarkerComponentOptions = {
   timecode: number
+  className?: string
+  title?: string
+  dataType?: string
+  getTimecode?: () => number
+  getSeekTimecode?: () => number
 }
 
 export type NextPreviousVideoButtonOptions = {
@@ -191,6 +203,11 @@ export type PopoutButtonOptions = {
 
 export type TheaterButtonOptions = {
   isDisplayed: () => boolean
+}
+
+export type EventMarkersToggleButtonOptions = {
+  isDisplayed: () => boolean
+  defaultHidden?: boolean
 }
 
 export type WebVideoPluginOptions = {
@@ -355,6 +372,7 @@ export type VideojsPlayer = ReturnType<typeof videojs.getPlayer> & {
   peertubeNSFW(options?: PeerTubeNSFWPluginOptions): PeerTubeNSFWPlugin
 
   chapters(options?: ChaptersOptions): ChaptersPlugin
+  eventMarkers(options?: EventMarkersOptions): EventMarkersPlugin
 
   upnext(options?: UpNextPluginOptions): UpNextPlugin
 

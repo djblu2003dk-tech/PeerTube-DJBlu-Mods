@@ -793,6 +793,8 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
 
       theaterButton: true,
       popoutButton: true,
+      eventMarkersToggleButton: () => false,
+      eventMarkersToggleButtonDefaultHidden: () => false,
       contextMenu: true,
 
       controls: urlOptions.controls,

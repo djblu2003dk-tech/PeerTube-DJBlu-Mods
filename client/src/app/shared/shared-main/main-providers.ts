@@ -13,6 +13,7 @@ import { UserNotificationService } from './users/user-notification.service'
 import { VideoCaptionService } from './video-caption/video-caption.service'
 import { RedundancyService } from './video/redundancy.service'
 import { VideoChapterService } from './video/video-chapter.service'
+import { VideoEventMarkerService } from './video/video-event-marker.service'
 import { VideoFileTokenService } from './video/video-file-token.service'
 import { VideoImportService } from './video/video-import.service'
 import { VideoOwnershipService } from './video/video-ownership.service'
@@ -38,6 +39,7 @@ export function getMainProviders () {
     VideoChannelService,
     VideoPasswordService,
     VideoChapterService,
+    VideoEventMarkerService,
     CustomPageService,
     ActorRedirectGuard,
     InstanceService,

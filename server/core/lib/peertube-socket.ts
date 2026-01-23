@@ -124,6 +124,17 @@ class PeerTubeSocket {
       .emit(type)
   }
 
+  sendVideoEventMarkersUpdated (video: MVideo) {
+    const data: LiveVideoEventPayload = { eventMarkersUpdated: true }
+    const type: LiveVideoEventType = 'event-markers-updated'
+
+    logger.debug('Sending video event markers update notification of %s.', video.url)
+
+    this.liveVideosNamespace
+      .in(video.id + '')
+      .emit(type, data)
+  }
+
   // ---------------------------------------------------------------------------
 
   @Debounce({ timeoutMS: 1000 })

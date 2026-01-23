@@ -66,7 +66,7 @@ export class PeerTubeSocket {
 
     this.liveVideosSocket = this.io(environment.apiUrl + '/live-videos')
 
-    const types: LiveVideoEventType[] = [ 'views-change', 'state-change', 'force-end' ]
+    const types: LiveVideoEventType[] = [ 'views-change', 'state-change', 'force-end', 'event-markers-updated' ]
 
     for (const type of types) {
       this.liveVideosSocket.on(type, (payload: LiveVideoEventPayload) => {

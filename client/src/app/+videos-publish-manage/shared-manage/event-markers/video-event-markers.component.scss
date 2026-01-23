@@ -1,0 +1,52 @@
+.event-marker-form {
+  max-width: 520px;
+  margin-bottom: 24px;
+}
+
+.event-marker-row {
+  margin-bottom: 12px;
+}
+
+.event-marker-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.event-marker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-marker-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.event-marker-item-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.event-marker-type {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.event-marker-time {
+  font-variant-numeric: tabular-nums;
+  color: #6c6c6c;
+}
+
+.event-marker-label {
+  color: #444;
+}
+
+.event-marker-empty {
+  color: #777;
+}

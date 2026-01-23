@@ -20,6 +20,7 @@ import { isVideoInPublicDirectory } from '@server/lib/video-privacy.js'
 import { moveToNextState } from '@server/lib/video-state.js'
 import { setVideoTags } from '@server/lib/video.js'
 import { VideoBlacklistModel } from '@server/models/video/video-blacklist.js'
+import { VideoEventMarkerModel } from '@server/models/video/video-event-marker.js'
 import { VideoFileModel } from '@server/models/video/video-file.js'
 import { VideoLiveReplaySettingModel } from '@server/models/video/video-live-replay-setting.js'
 import { VideoLiveSessionModel } from '@server/models/video/video-live-session.js'
@@ -164,6 +165,9 @@ async function saveReplayToExternalVideo (options: {
   liveSession.replayVideoId = replayVideo.id
   await liveSession.save()
 
+  await copyEventMarkersToReplay({ liveVideoId: liveVideo.id, replayVideoId: replayVideo.id })
+  await VideoEventMarkerModel.deleteMarkersOfVideo(liveVideo.id)
+
   // If live is blacklisted, also blacklist the replay
   const blacklist = await VideoBlacklistModel.loadByVideoId(liveVideo.id)
   if (blacklist) {
@@ -227,6 +231,22 @@ async function copyOrRegenerateThumbnails (options: {
 
   for (const thumbnail of thumbnails) {
     await replayVideo.addAndSaveThumbnail(thumbnail)
+  }
+}
+
+async function copyEventMarkersToReplay (options: { liveVideoId: number, replayVideoId: number }) {
+  const { liveVideoId, replayVideoId } = options
+
+  const markers = await VideoEventMarkerModel.listMarkersOfVideo(liveVideoId)
+  if (markers.length === 0) return
+
+  for (const marker of markers) {
+    await VideoEventMarkerModel.create({
+      videoId: replayVideoId,
+      timecode: marker.timecode,
+      type: marker.type,
+      label: marker.label || null
+    })
   }
 }
 

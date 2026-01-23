@@ -4,6 +4,7 @@ import {
   PeerTubePlayerConstructorOptions,
   PeerTubePlayerLoadOptions,
   PopoutButtonOptions,
+  EventMarkersToggleButtonOptions,
   TheaterButtonOptions
 } from '../../types'
 
@@ -13,6 +14,8 @@ type ControlBarOptionsBuilderConstructorOptions =
     videoShortUUID: () => string
     p2pEnabled: () => boolean
     embedUrl: () => string
+    eventMarkersToggleButton: () => boolean
+    eventMarkersToggleButtonDefaultHidden?: () => boolean
 
     previousVideo: () => PeerTubePlayerLoadOptions['previousVideo']
     nextVideo: () => PeerTubePlayerLoadOptions['nextVideo']
@@ -76,6 +79,7 @@ export class ControlBarOptionsBuilder {
   private getTimeControls () {
     return {
       peerTubeLiveDisplay: {},
+      eventMarkersToggleButton: this.getEventMarkersToggleButtonOptions(),
 
       currentTimeDisplay: {},
       timeDivider: {},
@@ -146,5 +150,14 @@ export class ControlBarOptionsBuilder {
     return {
       popoutButton: options
     }
+  }
+
+  private getEventMarkersToggleButtonOptions () {
+    const options: EventMarkersToggleButtonOptions = {
+      isDisplayed: () => this.options.eventMarkersToggleButton(),
+      defaultHidden: this.options.eventMarkersToggleButtonDefaultHidden?.()
+    }
+
+    return options
   }
 }

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router'
 import { VideoCaptionsComponent } from './captions/video-captions.component'
 import { VideoChaptersComponent } from './chapters/video-chapters.component'
+import { VideoEventMarkersComponent } from './event-markers/video-event-markers.component'
 import { VideoCustomizationComponent } from './customization/video-customization.component'
 import { VideoLiveSettingsComponent } from './live-settings/video-live-settings.component'
 import { VideoMainInfoComponent } from './main-info/video-main-info.component'
@@ -25,6 +26,10 @@ export const manageRoutes = [
   {
     path: 'chapters',
     component: VideoChaptersComponent
+  },
+  {
+    path: 'event-markers',
+    component: VideoEventMarkersComponent
   },
   {
     path: 'customization',

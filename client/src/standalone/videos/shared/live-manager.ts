@@ -9,6 +9,7 @@ export class LiveManager {
 
   private stateChangeListeners = new Map<string, (payload: LiveVideoEventPayload) => void>()
   private forceEndListeners = new Map<string, () => void>()
+  private eventMarkersListeners = new Map<string, () => void>()
 
   constructor (
     private readonly playerHTML: PlayerHTML
@@ -22,8 +23,10 @@ export class LiveManager {
     onPublishedVideo: () => any
 
     onForceEnd: () => any
+
+    onEventMarkersUpdated?: () => any
   }) {
-    const { video, onPublishedVideo, onForceEnd } = options
+    const { video, onPublishedVideo, onForceEnd, onEventMarkersUpdated } = options
 
     if (!this.liveSocket) {
       const io = (await import('socket.io-client')).io
@@ -42,11 +45,17 @@ export class LiveManager {
       onForceEnd()
     }
 
+    const eventMarkersListener = () => {
+      onEventMarkersUpdated?.()
+    }
+
     this.liveSocket.on('state-change', stateChangeListener)
     this.liveSocket.on('force-end', forceEndListener)
+    this.liveSocket.on('event-markers-updated', eventMarkersListener)
 
     this.stateChangeListeners.set(video.uuid, stateChangeListener)
     this.forceEndListeners.set(video.uuid, forceEndListener)
+    this.eventMarkersListeners.set(video.uuid, eventMarkersListener)
 
     this.liveSocket.emit('subscribe', { videoId: video.id })
   }
@@ -60,6 +69,11 @@ export class LiveManager {
     {
       const listener = this.forceEndListeners.get(video.uuid)
       if (listener) this.liveSocket.off('force-end', listener)
+    }
+
+    {
+      const listener = this.eventMarkersListeners.get(video.uuid)
+      if (listener) this.liveSocket.off('event-markers-updated', listener)
     }
 
     this.liveSocket.emit('unsubscribe', { videoId: video.id })
