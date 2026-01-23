@@ -1,5 +1,6 @@
 import { CommonModule, PlatformLocation } from '@angular/common'
-import { Component, ElementRef, inject, LOCALE_ID, NgZone, OnDestroy, OnInit, viewChild } from '@angular/core'
+import { Component, ElementRef, HostListener, inject, LOCALE_ID, NgZone, OnDestroy, OnInit, viewChild } from '@angular/core'
+import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router'
 import {
   AuthService,
@@ -21,6 +22,7 @@ import { HooksService } from '@app/core/plugins/hooks.service'
 import { getAPIUrl, getOriginUrl, isXPercentInViewport, scrollToTop, toBoolean } from '@app/helpers'
 import { VideoCaptionService } from '@app/shared/shared-main/video-caption/video-caption.service'
 import { VideoChapterService } from '@app/shared/shared-main/video/video-chapter.service'
+import { VideoEventMarkerService } from '@app/shared/shared-main/video/video-event-marker.service'
 import { VideoDetails } from '@app/shared/shared-main/video/video-details.model'
 import { VideoFileTokenService } from '@app/shared/shared-main/video/video-file-token.service'
 import { Video } from '@app/shared/shared-main/video/video.model'
@@ -43,6 +45,7 @@ import {
   Storyboard,
   VideoCaption,
   VideoChapter,
+  VideoEventMarker,
   VideoPrivacy,
   VideoState,
   VideoStateType
@@ -105,6 +108,7 @@ type URLOptions = {
   templateUrl: './video-watch.component.html',
   styleUrls: [ './video-watch.component.scss' ],
   imports: [
+    FormsModule,
     CommonModule,
     VideoWatchPlaylistComponent,
     PluginPlaceholderComponent,
@@ -140,6 +144,7 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
   private zone = inject(NgZone)
   private videoCaptionService = inject(VideoCaptionService)
   private videoChapterService = inject(VideoChapterService)
+  private videoEventMarkerService = inject(VideoEventMarkerService)
   private playerSettingsService = inject(PlayerSettingsService)
   private hotkeysService = inject(HotkeysService)
   private hooks = inject(HooksService)
@@ -161,6 +166,20 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
   video: VideoDetails = null
   videoCaptions: VideoCaption[] = []
   videoChapters: VideoChapter[] = []
+  videoEventMarkers: VideoEventMarker[] = []
+  videoEventMarkersLiveStartAt: string = null
+  eventMarkerPanelOpen = false
+  eventMarkerType: VideoEventMarker['type'] = 'goal'
+  eventMarkerLabel = ''
+  readonly eventMarkerTypes: { id: VideoEventMarker['type'], label: string }[] = [
+    { id: 'kickoff', label: $localize`Kick off` },
+    { id: 'goal', label: $localize`Goal` },
+    { id: 'penalty', label: $localize`Penalty` },
+    { id: 'half-time', label: $localize`Half-time` },
+    { id: 'red-card', label: $localize`Red card` },
+    { id: 'yellow-card', label: $localize`Yellow card` },
+    { id: 'full-time', label: $localize`Full-time` }
+  ]
   liveVideo: LiveVideo
   videoPassword: string
   storyboards: Storyboard[] = []
@@ -185,6 +204,7 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
   private queryParamsSub: Subscription
   private configSub: Subscription
   private liveVideosSub: Subscription
+  private eventMarkersPollIntervalId: any
 
   private serverConfig: HTMLServerConfig
 
@@ -223,6 +243,7 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
 
   ngOnDestroy () {
     if (this.peertubePlayer) this.peertubePlayer.destroy()
+    this.stopEventMarkersPolling()
 
     // Unsubscribe subscriptions
     if (this.paramsSub) this.paramsSub.unsubscribe()
@@ -242,6 +263,59 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
 
   getCurrentPlaylistPosition () {
     return this.videoWatchPlaylist().currentPlaylistPosition
+  }
+
+  @HostListener('window:keydown', [ '$event' ])
+  onWindowKeyDown (event: KeyboardEvent) {
+    if (!this.video?.isLive || !this.isUserOwner()) return
+
+    const target = event.target as HTMLElement
+    const tagName = target?.tagName?.toLowerCase()
+    if (tagName === 'input' || tagName === 'textarea' || target?.isContentEditable) return
+
+    if (event.code === 'Equal' && event.shiftKey) {
+      event.preventDefault()
+      if (!this.eventMarkerPanelOpen) this.openEventMarkerPanel()
+      return
+    }
+
+    if (event.code === 'Escape' && this.eventMarkerPanelOpen) {
+      event.preventDefault()
+      this.closeEventMarkerPanel()
+    }
+  }
+
+  openEventMarkerPanel () {
+    this.eventMarkerPanelOpen = true
+  }
+
+  closeEventMarkerPanel () {
+    this.eventMarkerPanelOpen = false
+    this.eventMarkerLabel = ''
+  }
+
+  submitEventMarker () {
+    if (!this.video?.isLive || !this.isUserOwner()) return
+
+    let timecode = Math.floor(this.peertubePlayer?.getPlayer()?.currentTime?.() || 0)
+
+    if (this.videoEventMarkersLiveStartAt) {
+      const liveStartMs = new Date(this.videoEventMarkersLiveStartAt).getTime()
+      if (!isNaN(liveStartMs)) {
+        timecode = Math.max(0, Math.floor((Date.now() - liveStartMs) / 1000))
+      }
+    }
+
+    this.videoEventMarkerService.createMarker(this.video.uuid, {
+      timecode,
+      type: this.eventMarkerType,
+      label: this.eventMarkerLabel || undefined
+    }).subscribe({
+      next: () => {
+        this.closeEventMarkerPanel()
+        this.refreshEventMarkers()
+      }
+    })
   }
 
   onRecommendations (videos: Video[]) {
@@ -383,16 +457,19 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
       videoAndLiveObs,
       this.videoCaptionService.listCaptions(videoId, videoPassword),
       this.videoChapterService.getChapters({ videoId, videoPassword }),
+      this.videoEventMarkerService.listMarkers({ videoId, videoPassword }),
       this.videoService.getStoryboards(videoId, videoPassword),
       this.playerSettingsService.getVideoSettings({ videoId, videoPassword, raw: false }),
       this.userService.getAnonymousOrLoggedUser()
     ]).subscribe({
-      next: ([ { video, live, videoFileToken }, captionsResult, chaptersResult, storyboards, playerSettings, loggedInOrAnonymousUser ]) => {
+      next: ([ { video, live, videoFileToken }, captionsResult, chaptersResult, eventMarkersResult, storyboards, playerSettings, loggedInOrAnonymousUser ]) => {
         this.onVideoFetched({
           video,
           live,
           videoCaptions: captionsResult.data,
           videoChapters: chaptersResult.chapters,
+          videoEventMarkers: eventMarkersResult.markers,
+          videoEventMarkersLiveStartAt: eventMarkersResult.liveStartAt,
           storyboards,
           videoFileToken,
           videoPassword,
@@ -508,6 +585,8 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
     live: LiveVideo
     videoCaptions: VideoCaption[]
     videoChapters: VideoChapter[]
+    videoEventMarkers: VideoEventMarker[]
+    videoEventMarkersLiveStartAt?: string
     storyboards: Storyboard[]
     videoFileToken: string
     videoPassword: string
@@ -521,6 +600,8 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
       live,
       videoCaptions,
       videoChapters,
+      videoEventMarkers,
+      videoEventMarkersLiveStartAt,
       storyboards,
       videoFileToken,
       videoPassword,
@@ -534,6 +615,9 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
     this.video = video
     this.videoCaptions = videoCaptions
     this.videoChapters = videoChapters
+    this.videoEventMarkers = videoEventMarkers
+    this.videoEventMarkersLiveStartAt = videoEventMarkersLiveStartAt || null
+    this.eventMarkerPanelOpen = false
     this.liveVideo = live
     this.videoFileToken = videoFileToken
     this.videoPassword = videoPassword
@@ -598,6 +682,8 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
       video: this.video,
       videoCaptions: this.videoCaptions,
       videoChapters: this.videoChapters,
+      videoEventMarkers: this.videoEventMarkers,
+      videoEventMarkersLiveStartAt: this.videoEventMarkersLiveStartAt,
       storyboards: this.storyboards,
       liveVideo: this.liveVideo,
       videoFileToken: this.videoFileToken,
@@ -707,6 +793,7 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
 
       theaterButton: true,
       popoutButton: true,
+      contextMenu: true,
 
       controls: urlOptions.controls,
       controlBar: urlOptions.controlBar,
@@ -751,6 +838,8 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
     liveVideo: LiveVideo
     videoCaptions: VideoCaption[]
     videoChapters: VideoChapter[]
+    videoEventMarkers: VideoEventMarker[]
+    videoEventMarkersLiveStartAt?: string
     storyboards: Storyboard[]
     playerSettings: PlayerVideoSettings
 
@@ -768,6 +857,8 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
       liveVideo,
       videoCaptions,
       videoChapters,
+      videoEventMarkers,
+      videoEventMarkersLiveStartAt,
       storyboards,
       videoFileToken,
       videoPassword,
@@ -885,6 +976,8 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
 
       videoCaptions: playerCaptions,
       videoChapters,
+      videoEventMarkers,
+      videoEventMarkersLiveStartAt,
       storyboard,
 
       videoShortUUID: video.shortUUID,
@@ -942,9 +1035,14 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
       this.peertubeSocket.unsubscribeLiveVideos(oldVideo.id)
     }
 
-    if (!newVideo.isLive) return
+    if (!newVideo.isLive) {
+      this.stopEventMarkersPolling()
+      return
+    }
 
     await this.peertubeSocket.subscribeToLiveVideosSocket(newVideo.id)
+
+    this.startEventMarkersPolling()
   }
 
   private buildLiveEventsSubscription () {
@@ -953,6 +1051,44 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
         if (type === 'state-change') return this.handleLiveStateChange(payload.state)
         if (type === 'views-change') return this.handleLiveViewsChange(payload.viewers)
         if (type === 'force-end') return this.endLive()
+        if (type === 'event-markers-updated') return this.refreshEventMarkers()
+      })
+  }
+
+  private startEventMarkersPolling () {
+    if (this.eventMarkersPollIntervalId) return
+
+    this.eventMarkersPollIntervalId = setInterval(() => {
+      this.refreshEventMarkers()
+    }, 10_000)
+  }
+
+  private stopEventMarkersPolling () {
+    if (!this.eventMarkersPollIntervalId) return
+
+    clearInterval(this.eventMarkersPollIntervalId)
+    this.eventMarkersPollIntervalId = null
+  }
+
+  private refreshEventMarkers () {
+    if (!this.video) return
+
+    this.videoEventMarkerService.listMarkers({ videoId: this.video.uuid, videoPassword: this.videoPassword })
+      .subscribe({
+        next: ({ markers, liveStartAt }) => {
+          this.videoEventMarkers = markers
+          this.videoEventMarkersLiveStartAt = liveStartAt || null
+
+          const player = this.peertubePlayer?.getPlayer()
+          if (player?.usingPlugin('eventMarkers')) {
+            player.eventMarkers().setMarkers({
+              markers,
+              liveStartAt,
+              isLive: this.video.isLive,
+              isLiveDvr: this.video.isLive && this.liveVideo?.dvrEnabled === true
+            })
+          }
+        }
       })
   }
 
@@ -1083,6 +1219,8 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
     if (!this.video.isLive) return
 
     this.video.state.id = VideoState.LIVE_ENDED
+
+    this.stopEventMarkersPolling()
 
     this.updatePlayerOnNoLive({ hasPlayed: true })
   }
