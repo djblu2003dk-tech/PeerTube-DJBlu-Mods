@@ -40,6 +40,50 @@
             <button class="btn btn-primary" type="button" (click)="submitEventMarker()" i18n>Add</button>
             <button class="btn btn-outline-light" type="button" (click)="closeEventMarkerPanel()" i18n>Cancel</button>
           </div>
+
+          <div class="event-marker-panel-title mt-3" i18n>Existing markers</div>
+          <div class="event-marker-panel-list">
+            @for (m of videoEventMarkers; track m.id) {
+              <div class="event-marker-panel-item">
+                @if (editMarkerId === m.id) {
+                  <div class="event-marker-panel-row">
+                    <select class="form-control" [(ngModel)]="editMarkerType">
+                      @for (t of eventMarkerTypes; track t.id) {
+                        <option [value]="t.id">{{ t.label }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="event-marker-panel-row">
+                    <input
+                      class="form-control"
+                      [(ngModel)]="editMarkerLabel"
+                      i18n-placeholder
+                      placeholder="Tooltip text (optional)"
+                      type="text"
+                    />
+                  </div>
+                  <div class="event-marker-panel-row">
+                    <input class="form-control" type="number" min="0" step="1" [(ngModel)]="editMarkerTimecode" />
+                    <button class="btn btn-outline-light ms-2" type="button" (click)="setEditMarkerTimeToCurrent()" i18n>Use current time</button>
+                  </div>
+                  <div class="event-marker-panel-actions">
+                    <button class="btn btn-primary" type="button" (click)="applyEditMarker()" i18n>Save</button>
+                    <button class="btn btn-outline-light" type="button" (click)="cancelEditMarker()" i18n>Cancel</button>
+                  </div>
+                } @else {
+                  <div class="event-marker-panel-item-line">
+                    <span class="event-marker-time">{{ formatEventMarkerTimecode(m.timecode) }}</span>
+                    <span class="event-marker-type">{{ m.type }}</span>
+                    <span class="event-marker-label">{{ m.label }}</span>
+                  </div>
+                  <div class="event-marker-panel-actions">
+                    <button class="btn btn-outline-light" type="button" (click)="startEditMarker(m)" i18n>Edit</button>
+                    <button class="btn btn-outline-danger" type="button" (click)="deleteEventMarker(m)" i18n>Delete</button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
         </div>
       }
 

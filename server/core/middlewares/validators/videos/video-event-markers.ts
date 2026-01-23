@@ -65,6 +65,49 @@ export const deleteVideoEventMarkerValidator = [
   }
 ]
 
+export const updateVideoEventMarkerValidator = [
+  isValidVideoIdParam('videoId'),
+
+  body('timecode')
+    .optional()
+    .custom(isEventMarkerTimecodeValid)
+    .withMessage('Must have a valid timecode'),
+
+  body('type')
+    .optional()
+    .custom(isEventMarkerTypeValid)
+    .withMessage('Must have a valid event marker type'),
+
+  body('label')
+    .optional({ nullable: true })
+    .custom(isEventMarkerLabelValid)
+    .withMessage('Must have a valid label'),
+
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (areValidationErrors(req, res)) return
+    if (!await doesVideoExist(req.params.videoId, res)) return
+
+    const { timecode, type, label } = req.body || {}
+    if (timecode === undefined && type === undefined && label === undefined) {
+      res.fail({ message: 'At least one field to update is required' })
+      return
+    }
+
+    const user = res.locals.oauth.token.User
+    if (!await checkCanManageVideo({
+      user,
+      video: res.locals.videoAll,
+      right: UserRight.UPDATE_ANY_VIDEO,
+      req,
+      res,
+      checkIsLocal: true,
+      checkIsOwner: false
+    })) return
+
+    return next()
+  }
+]
+
 export const listVideoEventMarkersValidator = [
   isValidVideoIdParam('id'),
 

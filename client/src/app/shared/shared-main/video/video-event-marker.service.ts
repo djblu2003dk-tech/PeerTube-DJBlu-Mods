@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core'
 import { RestExtractor } from '@app/core'
-import { VideoEventMarker, VideoEventMarkerCreate } from '@peertube/peertube-models'
+import { VideoEventMarker, VideoEventMarkerCreate, VideoEventMarkerUpdate } from '@peertube/peertube-models'
 import { catchError } from 'rxjs/operators'
 import { VideoPasswordService } from './video-password.service'
 import { VideoService } from './video.service'
@@ -30,6 +30,11 @@ export class VideoEventMarkerService {
 
   deleteMarker (options: { videoId: string, markerId: number }) {
     return this.authHttp.delete(`${VideoService.BASE_VIDEO_URL}/${options.videoId}/event-markers/${options.markerId}`)
+      .pipe(catchError(err => this.restExtractor.handleError(err)))
+  }
+
+  updateMarker (options: { videoId: string, markerId: number, marker: VideoEventMarkerUpdate }) {
+    return this.authHttp.put<{ marker: VideoEventMarker }>(`${VideoService.BASE_VIDEO_URL}/${options.videoId}/event-markers/${options.markerId}`, options.marker)
       .pipe(catchError(err => this.restExtractor.handleError(err)))
   }
 }

@@ -4,7 +4,8 @@ import { asyncMiddleware, authenticate, videosCustomGetValidator } from '../../.
 import {
   createVideoEventMarkerValidator,
   deleteVideoEventMarkerValidator,
-  listVideoEventMarkersValidator
+  listVideoEventMarkersValidator,
+  updateVideoEventMarkerValidator
 } from '../../../middlewares/validators/index.js'
 import { VideoEventMarkerModel } from '@server/models/video/video-event-marker.js'
 import { VideoLiveSessionModel } from '@server/models/video/video-live-session.js'
@@ -31,6 +32,13 @@ videoEventMarkersRouter.delete(
   authenticate,
   asyncMiddleware(deleteVideoEventMarkerValidator),
   asyncMiddleware(deleteVideoEventMarker)
+)
+
+videoEventMarkersRouter.put(
+  '/:videoId/event-markers/:markerId',
+  authenticate,
+  asyncMiddleware(updateVideoEventMarkerValidator),
+  asyncMiddleware(updateVideoEventMarker)
 )
 
 // ---------------------------------------------------------------------------
@@ -82,4 +90,27 @@ async function deleteVideoEventMarker (req: express.Request, res: express.Respon
   PeerTubeSocket.Instance.sendVideoEventMarkersUpdated(video)
 
   return res.sendStatus(HttpStatusCode.NO_CONTENT_204)
+}
+
+async function updateVideoEventMarker (req: express.Request, res: express.Response) {
+  const video = res.locals.videoAll
+  const markerId = Number.parseInt(req.params.markerId, 10)
+
+  const marker = await VideoEventMarkerModel.findOne({
+    where: { id: markerId, videoId: video.id }
+  })
+
+  if (!marker) {
+    return res.sendStatus(HttpStatusCode.NOT_FOUND_404)
+  }
+
+  if (req.body.timecode !== undefined) marker.timecode = Math.floor(req.body.timecode)
+  if (req.body.type !== undefined) marker.type = req.body.type
+  if (req.body.label !== undefined) marker.label = req.body.label || null
+
+  await marker.save()
+
+  PeerTubeSocket.Instance.sendVideoEventMarkersUpdated(video)
+
+  return res.json({ marker: marker.toFormattedJSON() })
 }

@@ -171,6 +171,10 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
   eventMarkerPanelOpen = false
   eventMarkerType: VideoEventMarker['type'] = 'goal'
   eventMarkerLabel = ''
+  editMarkerId: number | null = null
+  editMarkerType: VideoEventMarker['type'] = 'goal'
+  editMarkerLabel = ''
+  editMarkerTimecode = 0
   readonly eventMarkerTypes: { id: VideoEventMarker['type'], label: string }[] = [
     { id: 'kickoff', label: $localize`Kick off` },
     { id: 'goal', label: $localize`Goal` },
@@ -297,6 +301,71 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
   submitEventMarker () {
     if (!this.video?.isLive || !this.isUserOwner()) return
 
+    const timecode = this.getEventMarkerTimecodeFromPlayer()
+
+    this.videoEventMarkerService.createMarker(this.video.uuid, {
+      timecode,
+      type: this.eventMarkerType,
+      label: this.eventMarkerLabel || undefined
+    }).subscribe({
+      next: () => {
+        this.closeEventMarkerPanel()
+        this.refreshEventMarkers()
+      }
+    })
+  }
+
+  startEditMarker (marker: VideoEventMarker) {
+    this.editMarkerId = marker.id
+    this.editMarkerType = marker.type
+    this.editMarkerLabel = marker.label || ''
+    this.editMarkerTimecode = marker.timecode
+  }
+
+  cancelEditMarker () {
+    this.editMarkerId = null
+  }
+
+  setEditMarkerTimeToCurrent () {
+    this.editMarkerTimecode = this.getEventMarkerTimecodeFromPlayer()
+  }
+
+  applyEditMarker () {
+    if (!this.editMarkerId) return
+
+    this.videoEventMarkerService.updateMarker({
+      videoId: this.video.uuid,
+      markerId: this.editMarkerId,
+      marker: {
+        timecode: Math.max(0, Math.floor(this.editMarkerTimecode)),
+        type: this.editMarkerType,
+        label: this.editMarkerLabel || null
+      }
+    }).subscribe({
+      next: () => {
+        this.cancelEditMarker()
+        this.refreshEventMarkers()
+      }
+    })
+  }
+
+  deleteEventMarker (marker: VideoEventMarker) {
+    this.videoEventMarkerService.deleteMarker({ videoId: this.video.uuid, markerId: marker.id }).subscribe({
+      next: () => this.refreshEventMarkers()
+    })
+  }
+
+  formatEventMarkerTimecode (timecode: number) {
+    const total = Math.max(0, Math.floor(timecode || 0))
+    const hours = Math.floor(total / 3600)
+    const minutes = Math.floor((total % 3600) / 60)
+    const seconds = total % 60
+
+    if (hours > 0) return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+    return `${minutes}:${String(seconds).padStart(2, '0')}`
+  }
+
+  private getEventMarkerTimecodeFromPlayer () {
     const player = this.peertubePlayer?.getPlayer()
     const currentTime = Math.floor(player?.currentTime?.() || 0)
     let timecode = currentTime
@@ -312,16 +381,7 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
       }
     }
 
-    this.videoEventMarkerService.createMarker(this.video.uuid, {
-      timecode,
-      type: this.eventMarkerType,
-      label: this.eventMarkerLabel || undefined
-    }).subscribe({
-      next: () => {
-        this.closeEventMarkerPanel()
-        this.refreshEventMarkers()
-      }
-    })
+    return timecode
   }
 
   onRecommendations (videos: Video[]) {
