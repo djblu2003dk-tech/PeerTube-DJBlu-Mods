@@ -305,7 +305,7 @@ export class PeerTubePlayer {
           addButtonToControlBar: false,
           buttonPositionIndex: -2,
           requestTitleFn: () => this.currentLoadOptions?.embedTitle || '',
-          modifyLoadRequestFn: request => {
+          modifyLoadRequestFn: (request: any) => {
             const castSource = this.getCastSource()
             if (castSource) {
               request.media.contentId = castSource.src
