@@ -58,10 +58,15 @@ class EventMarkersPlugin extends Plugin {
     if (!seekBar) return
 
     for (const marker of this.markers) {
+      const baseLabel = marker.label || EVENT_LABELS[marker.type] || ''
+      const title = marker.type === 'goal' && marker.label
+        ? `${EVENT_LABELS.goal} - ${marker.label}`
+        : baseLabel
+
       const markerComponent = new ProgressBarMarkerComponent(this.player, {
         timecode: marker.timecode,
         className: `vjs-event-marker vjs-event-marker-${marker.type}`,
-        title: marker.label || EVENT_LABELS[marker.type] || '',
+        title,
         dataType: marker.type,
         getTimecode: () => this.getDisplayTimecode(marker),
         getSeekTimecode: () => this.getDisplayTimecode(marker)
