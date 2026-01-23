@@ -336,11 +336,7 @@ export class PeerTubePlayer {
   private getCastSource () {
     if (this.currentLoadOptions?.isLive) {
       const liveHlsUrl = this.currentLoadOptions?.hls?.playlistUrl
-      if (liveHlsUrl) {
-        // Prefer a variant playlist when possible to avoid Chromecast issues with master/audio groups
-        const variantUrl = liveHlsUrl.replace(/master\.m3u8$/i, '1.m3u8')
-        return { src: variantUrl, type: 'application/x-mpegURL' }
-      }
+      if (liveHlsUrl) return { src: liveHlsUrl, type: 'application/x-mpegURL' }
     }
 
     const files = this.currentLoadOptions?.castVideoFiles || []
