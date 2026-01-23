@@ -378,6 +378,9 @@ export type VideojsPlayer = ReturnType<typeof videojs.getPlayer> & {
 
   playlist(options?: PlaylistPluginOptions): PlaylistPlugin
 
+  chromecast?(options?: any): void
+  airPlay?(options?: any): void
+
   // ---------------------------------------------------------------------------
 
   theaterEnabled: boolean

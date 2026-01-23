@@ -355,6 +355,29 @@ $event-marker-size: 14px;
     }
   }
 
+  .vjs-chromecast-button,
+  .vjs-airplay-button {
+    width: var(--button-width);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @include disable-outline;
+  }
+
+  .vjs-chromecast-button {
+    @include inject-icon("./svg/cast.svg", calc(var(--icon-size) - 4px));
+  }
+
+  .vjs-airplay-button {
+    @include inject-icon("./svg/airplay.svg", calc(var(--icon-size) - 4px));
+  }
+
+  .vjs-chromecast-button.vjs-chromecast-casting-state {
+    color: pvar(--primary);
+  }
+
   .vjs-event-markers-toggle {
     width: var(--button-width);
     cursor: pointer;

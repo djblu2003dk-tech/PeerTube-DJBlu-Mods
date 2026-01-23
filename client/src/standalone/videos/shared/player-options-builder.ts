@@ -218,6 +218,8 @@ export class PlayerOptionsBuilder {
 
       theaterButton: false,
       popoutButton: true,
+      chromecastButton: true,
+      airPlayButton: true,
       eventMarkersToggleButton: () => true,
       eventMarkersToggleButtonDefaultHidden: () => true,
       contextMenu: this.contextMenu,

@@ -6,6 +6,8 @@ import { copyToClipboard } from '@root-helpers/utils'
 import { buildVideoOrPlaylistEmbed } from '@root-helpers/video'
 import { isMobile } from '@root-helpers/web-browser'
 import videojs from 'video.js'
+import registerChromecast from '@silvermine/videojs-chromecast'
+import registerAirPlay from '@silvermine/videojs-airplay'
 import { saveAverageBandwidth } from './peertube-player-local-storage'
 import './shared/bezels/bezels-plugin'
 import './shared/context-menu'
@@ -33,6 +35,7 @@ import './shared/p2p-media-loader/hls-plugin'
 import './shared/p2p-media-loader/p2p-media-loader-plugin'
 import './shared/peertube/peertube-plugin'
 import { ControlBarOptionsBuilder, HLSOptionsBuilder, WebVideoOptionsBuilder } from './shared/player-options-builder'
+import { loadCastSdk } from './shared/casting/cast-sdk-loader'
 import './shared/playlist/playlist-plugin'
 import './shared/resolutions/peertube-resolutions-plugin'
 import './shared/settings/menu-focus-fixed'
@@ -57,6 +60,8 @@ import {
   VideojsPlayerOptions,
   VideoJSPluginOptions
 } from './types'
+
+let castingPluginsRegistered = false
 
 const CaptionsButton = videojs.getComponent('CaptionsButton') as any
 // Change Captions to Subtitles/CC
@@ -231,6 +236,12 @@ export class PeerTubePlayer {
 
     await TranslationsManager.loadLocaleInVideoJS(this.options.serverUrl, this.options.language, videojs)
 
+    if (!castingPluginsRegistered && (this.options.chromecastButton || this.options.airPlayButton)) {
+      registerChromecast(videojs)
+      registerAirPlay(videojs)
+      castingPluginsRegistered = true
+    }
+
     const videojsOptions = await this.pluginsManager.runHook(
       'filter:internal.player.videojs.options.result',
       this.getVideojsOptions()
@@ -275,8 +286,33 @@ export class PeerTubePlayer {
         this.player.contextMenu(this.getContextMenuOptions())
       }
 
+      this.enableCastingFeatures()
+
       this.displayNotificationWhenOffline()
     })
+  }
+
+  private enableCastingFeatures () {
+    if (!this.player) return
+
+    if (this.options.chromecastButton) {
+      // Load the Cast SDK and let the plugin poll for API availability.
+      loadCastSdk()
+
+      if (this.player.chromecast) {
+        this.player.chromecast({
+          addButtonToControlBar: false,
+          buttonPositionIndex: -2
+        })
+      }
+    }
+
+    if (this.options.airPlayButton && this.player.airPlay) {
+      this.player.airPlay({
+        addButtonToControlBar: false,
+        buttonPositionIndex: -2
+      })
+    }
   }
 
   private disposeDynamicPluginsIfNeeded () {
@@ -421,6 +457,8 @@ export class PeerTubePlayer {
       nativeTextTracks: false
     }
 
+    const enableChromecast = this.options.chromecastButton
+
     const plugins: VideoJSPluginOptions = {
       peertube: {
         hasAutoplay: () => this.getAutoPlayValue(this.currentLoadOptions.autoplay),
@@ -464,6 +502,8 @@ export class PeerTubePlayer {
       embedUrl: () => this.currentLoadOptions.embedUrl,
       eventMarkersToggleButton: () => this.options.eventMarkersToggleButton(),
       eventMarkersToggleButtonDefaultHidden: () => this.options.eventMarkersToggleButtonDefaultHidden?.() ?? false,
+      chromecastButton: () => this.options.chromecastButton,
+      airPlayButton: () => this.options.airPlayButton,
 
       nextVideo: () => this.currentLoadOptions.nextVideo,
       previousVideo: () => this.currentLoadOptions.previousVideo
@@ -485,6 +525,8 @@ export class PeerTubePlayer {
 
       poster: this.currentLoadOptions.poster,
       preload: 'none' as 'none',
+
+      techOrder: enableChromecast ? [ 'chromecast', 'html5' ] : undefined,
 
       inactivityTimeout: this.options.inactivityTimeout,
       playbackRates: [ 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2 ],

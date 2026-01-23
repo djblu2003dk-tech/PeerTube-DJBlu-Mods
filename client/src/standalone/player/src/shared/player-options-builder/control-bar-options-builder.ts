@@ -16,6 +16,8 @@ type ControlBarOptionsBuilderConstructorOptions =
     embedUrl: () => string
     eventMarkersToggleButton: () => boolean
     eventMarkersToggleButtonDefaultHidden?: () => boolean
+    chromecastButton: () => boolean
+    airPlayButton: () => boolean
 
     previousVideo: () => PeerTubePlayerLoadOptions['previousVideo']
     nextVideo: () => PeerTubePlayerLoadOptions['nextVideo']
@@ -46,6 +48,8 @@ export class ControlBarOptionsBuilder {
       captionToggleButton: {},
 
       ...this.getSettingsButton(),
+
+      ...this.getCastButtons(),
 
       ...this.getPeerTubeLinkButton(),
 
@@ -85,6 +89,15 @@ export class ControlBarOptionsBuilder {
       timeDivider: {},
       durationDisplay: {}
     }
+  }
+
+  private getCastButtons () {
+    const buttons: Record<string, object> = {}
+
+    if (this.options.chromecastButton()) buttons.chromecastButton = {}
+    if (this.options.airPlayButton()) buttons.airPlayButton = {}
+
+    return buttons
   }
 
   private getProgressControl () {

@@ -25,6 +25,8 @@ export type PeerTubePlayerConstructorOptions = {
 
   theaterButton: boolean
   popoutButton: boolean
+  chromecastButton: boolean
+  airPlayButton: boolean
   eventMarkersToggleButton: () => boolean
   eventMarkersToggleButtonDefaultHidden?: () => boolean
   contextMenu: boolean
