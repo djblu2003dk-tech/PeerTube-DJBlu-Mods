@@ -6,9 +6,7 @@ import { copyToClipboard } from '@root-helpers/utils'
 import { buildVideoOrPlaylistEmbed } from '@root-helpers/video'
 import { isMobile } from '@root-helpers/web-browser'
 import videojs from 'video.js'
-// @ts-expect-error no types for this plugin
 import registerChromecast from '@silvermine/videojs-chromecast'
-// @ts-expect-error no types for this plugin
 import registerAirPlay from '@silvermine/videojs-airplay'
 import { saveAverageBandwidth } from './peertube-player-local-storage'
 import './shared/bezels/bezels-plugin'
