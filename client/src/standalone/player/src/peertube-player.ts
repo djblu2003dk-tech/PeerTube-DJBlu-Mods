@@ -1,3 +1,4 @@
+/// <reference path="./types/videojs-casting-plugins.d.ts" />
 import { buildVideoLink, decorateVideoLink, isDefaultLocale, pick } from '@peertube/peertube-core-utils'
 import { logger } from '@root-helpers/logger'
 import { PluginsManager } from '@root-helpers/plugins-manager'
