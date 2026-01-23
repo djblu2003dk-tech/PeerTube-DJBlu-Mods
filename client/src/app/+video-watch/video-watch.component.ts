@@ -862,6 +862,8 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
       eventMarkersToggleButton: () => false,
       eventMarkersToggleButtonDefaultHidden: () => false,
       contextMenu: true,
+      chromecastButton: true,
+      airPlayButton: true,
 
       controls: urlOptions.controls,
       controlBar: urlOptions.controlBar,
@@ -1087,6 +1089,7 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
       },
 
       hls: hlsOptions,
+      castVideoFiles: video.files,
 
       webVideo: {
         videoFiles: video.files

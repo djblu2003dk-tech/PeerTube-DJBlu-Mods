@@ -146,7 +146,8 @@ export class FFmpegLive {
       input: inputUrl,
 
       canCopyAudio: true,
-      canCopyVideo: true,
+      // Force re-encode so H.264 level/profile settings are applied (Chromecast compatibility).
+      canCopyVideo: false,
 
       inputBitrate: bitrate,
       inputRatio: ratio,
@@ -253,7 +254,8 @@ export class FFmpegLive {
 
     command.outputOption('-hls_time ' + segmentDuration)
     command.outputOption('-hls_list_size ' + segmentListSize)
-    command.outputOption('-hls_flags delete_segments+independent_segments+program_date_time+temp_file')
+    command.outputOption('-hls_playlist_type event')
+    command.outputOption('-hls_flags delete_segments+independent_segments+temp_file')
     command.outputOption(`-hls_segment_filename ${join(outPath, '%v-%06d.ts')}`)
     command.outputOption('-master_pl_name ' + masterPlaylistName)
     command.outputOption(`-f hls`)

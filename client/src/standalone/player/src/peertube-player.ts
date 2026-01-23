@@ -13,6 +13,8 @@ import './shared/control-bar/caption-toggle-button'
 import './shared/control-bar/chapters-plugin'
 import './shared/control-bar/event-markers-plugin'
 import './shared/control-bar/event-markers-toggle-button'
+import './shared/control-bar/chromecast-button'
+import './shared/control-bar/airplay-button'
 import './shared/control-bar/next-previous-video-button'
 import './shared/control-bar/p2p-info-button'
 import './shared/control-bar/peertube-link-button'
@@ -279,6 +281,29 @@ export class PeerTubePlayer {
     })
   }
 
+
+  private getCastSource () {
+    if (this.currentLoadOptions?.isLive) {
+      const liveHlsUrl = this.currentLoadOptions?.hls?.playlistUrl
+      if (liveHlsUrl) return { src: liveHlsUrl, type: 'application/vnd.apple.mpegurl', isLive: true }
+    }
+
+    const files = this.currentLoadOptions?.castVideoFiles || []
+    if (files.length > 0) {
+      const sorted = [ ...files ].sort((a, b) => (a.resolution?.id || 0) - (b.resolution?.id || 0))
+      const file = sorted[sorted.length - 1]
+
+      if (file?.fileUrl) {
+        return { src: file.fileUrl, type: 'video/mp4', isLive: false }
+      }
+    }
+
+    const hlsUrl = this.currentLoadOptions?.hls?.playlistUrl
+    if (hlsUrl) return { src: hlsUrl, type: 'application/vnd.apple.mpegurl', isLive: false }
+
+    return null
+  }
+
   private disposeDynamicPluginsIfNeeded () {
     if (!this.player) return
 
@@ -464,6 +489,11 @@ export class PeerTubePlayer {
       embedUrl: () => this.currentLoadOptions.embedUrl,
       eventMarkersToggleButton: () => this.options.eventMarkersToggleButton(),
       eventMarkersToggleButtonDefaultHidden: () => this.options.eventMarkersToggleButtonDefaultHidden?.() ?? false,
+      chromecastButton: () => this.options.chromecastButton,
+      airPlayButton: () => this.options.airPlayButton,
+      getCastSource: () => this.getCastSource(),
+      getCastTitle: () => this.currentLoadOptions?.embedTitle || '',
+      getCastPoster: () => this.currentLoadOptions?.poster || '',
 
       nextVideo: () => this.currentLoadOptions.nextVideo,
       previousVideo: () => this.currentLoadOptions.previousVideo

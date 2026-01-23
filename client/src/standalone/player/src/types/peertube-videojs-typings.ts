@@ -210,6 +210,23 @@ export type EventMarkersToggleButtonOptions = {
   defaultHidden?: boolean
 }
 
+export type CastSource = {
+  src: string
+  type: string
+  isLive?: boolean
+}
+
+export type ChromecastButtonOptions = {
+  isDisplayed: () => boolean
+  getCastSource: () => CastSource | null
+  getCastTitle: () => string
+  getCastPoster: () => string
+}
+
+export type AirPlayButtonOptions = {
+  isDisplayed: () => boolean
+}
+
 export type WebVideoPluginOptions = {
   videoFiles: VideoFile[]
   videoFileToken: () => string

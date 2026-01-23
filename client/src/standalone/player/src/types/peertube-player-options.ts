@@ -28,6 +28,8 @@ export type PeerTubePlayerConstructorOptions = {
   eventMarkersToggleButton: () => boolean
   eventMarkersToggleButtonDefaultHidden?: () => boolean
   contextMenu: boolean
+  chromecastButton?: boolean
+  airPlayButton?: boolean
 
   authorizationHeader: () => string
 
@@ -82,6 +84,7 @@ export type PeerTubePlayerLoadOptions = {
   videoEventMarkers?: VideoEventMarker[]
   videoEventMarkersLiveStartAt?: string
   storyboard: VideoJSStoryboard
+  castVideoFiles?: VideoFile[]
 
   videoUUID: string
   videoShortUUID: string

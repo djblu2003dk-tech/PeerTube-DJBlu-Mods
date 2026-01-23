@@ -34,6 +34,9 @@ const defaultX264LiveOptionsBuilder: EncoderOptionsBuilder = (options: EncoderOp
     outputOptions: [
       ...getCommonOutputOptions(targetBitrate, streamNum),
 
+      `${buildStreamSuffix('-profile:v', streamNum)} high`,
+      `${buildStreamSuffix('-level:v', streamNum)} 4.1`,
+
       `${buildStreamSuffix('-r:v', streamNum)} ${fps}`,
       `${buildStreamSuffix('-b:v', streamNum)} ${targetBitrate}`
     ]

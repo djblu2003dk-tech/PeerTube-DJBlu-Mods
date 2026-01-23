@@ -198,6 +198,8 @@ export class PlayerOptionsBuilder {
       loop: this.loop,
 
       playbackRate: this.playbackRate,
+      chromecastButton: true,
+      airPlayButton: true,
 
       inactivityTimeout: 2500,
 
@@ -351,6 +353,8 @@ export class PlayerOptionsBuilder {
       ...this.buildPlaylistOptions(playlist),
 
       dock: this.buildDockOptions(video),
+
+      castVideoFiles: video.files,
 
       webVideo: {
         videoFiles: video.files

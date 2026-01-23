@@ -5,6 +5,8 @@ import {
   PeerTubePlayerLoadOptions,
   PopoutButtonOptions,
   EventMarkersToggleButtonOptions,
+  ChromecastButtonOptions,
+  AirPlayButtonOptions,
   TheaterButtonOptions
 } from '../../types'
 
@@ -16,6 +18,11 @@ type ControlBarOptionsBuilderConstructorOptions =
     embedUrl: () => string
     eventMarkersToggleButton: () => boolean
     eventMarkersToggleButtonDefaultHidden?: () => boolean
+    getCastSource: ChromecastButtonOptions['getCastSource']
+    getCastTitle: ChromecastButtonOptions['getCastTitle']
+    getCastPoster: ChromecastButtonOptions['getCastPoster']
+    chromecastButton: () => boolean
+    airPlayButton: () => boolean
 
     previousVideo: () => PeerTubePlayerLoadOptions['previousVideo']
     nextVideo: () => PeerTubePlayerLoadOptions['nextVideo']
@@ -46,6 +53,8 @@ export class ControlBarOptionsBuilder {
       captionToggleButton: {},
 
       ...this.getSettingsButton(),
+
+      ...this.getCastButtons(),
 
       ...this.getPeerTubeLinkButton(),
 
@@ -85,6 +94,31 @@ export class ControlBarOptionsBuilder {
       timeDivider: {},
       durationDisplay: {}
     }
+  }
+
+  private getCastButtons () {
+    const buttons: Record<string, object> = {}
+
+    if (this.options.chromecastButton()) {
+      const options: ChromecastButtonOptions = {
+        isDisplayed: () => this.options.chromecastButton(),
+        getCastSource: this.options.getCastSource,
+        getCastTitle: this.options.getCastTitle,
+        getCastPoster: this.options.getCastPoster
+      }
+
+      buttons.chromecastButton = options
+    }
+
+    if (this.options.airPlayButton()) {
+      const options: AirPlayButtonOptions = {
+        isDisplayed: () => this.options.airPlayButton()
+      }
+
+      buttons.airPlayButton = options
+    }
+
+    return buttons
   }
 
   private getProgressControl () {
