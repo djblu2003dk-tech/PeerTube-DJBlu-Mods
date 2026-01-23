@@ -1,4 +1,3 @@
-/// <reference path="./types/videojs-casting-plugins.d.ts" />
 import { buildVideoLink, decorateVideoLink, isDefaultLocale, pick } from '@peertube/peertube-core-utils'
 import { logger } from '@root-helpers/logger'
 import { PluginsManager } from '@root-helpers/plugins-manager'
@@ -7,8 +6,6 @@ import { copyToClipboard } from '@root-helpers/utils'
 import { buildVideoOrPlaylistEmbed } from '@root-helpers/video'
 import { isMobile } from '@root-helpers/web-browser'
 import videojs from 'video.js'
-import registerChromecast from '@silvermine/videojs-chromecast'
-import registerAirPlay from '@silvermine/videojs-airplay'
 import { saveAverageBandwidth } from './peertube-player-local-storage'
 import './shared/bezels/bezels-plugin'
 import './shared/context-menu'
@@ -36,7 +33,6 @@ import './shared/p2p-media-loader/hls-plugin'
 import './shared/p2p-media-loader/p2p-media-loader-plugin'
 import './shared/peertube/peertube-plugin'
 import { ControlBarOptionsBuilder, HLSOptionsBuilder, WebVideoOptionsBuilder } from './shared/player-options-builder'
-import { loadCastSdk } from './shared/casting/cast-sdk-loader'
 import './shared/playlist/playlist-plugin'
 import './shared/resolutions/peertube-resolutions-plugin'
 import './shared/settings/menu-focus-fixed'
@@ -61,8 +57,6 @@ import {
   VideojsPlayerOptions,
   VideoJSPluginOptions
 } from './types'
-
-let castingPluginsRegistered = false
 
 const CaptionsButton = videojs.getComponent('CaptionsButton') as any
 // Change Captions to Subtitles/CC
@@ -237,12 +231,6 @@ export class PeerTubePlayer {
 
     await TranslationsManager.loadLocaleInVideoJS(this.options.serverUrl, this.options.language, videojs)
 
-    if (!castingPluginsRegistered && (this.options.chromecastButton || this.options.airPlayButton)) {
-      registerChromecast(videojs)
-      registerAirPlay(videojs)
-      castingPluginsRegistered = true
-    }
-
     const videojsOptions = await this.pluginsManager.runHook(
       'filter:internal.player.videojs.options.result',
       this.getVideojsOptions()
@@ -287,106 +275,8 @@ export class PeerTubePlayer {
         this.player.contextMenu(this.getContextMenuOptions())
       }
 
-      this.enableCastingFeatures()
-
       this.displayNotificationWhenOffline()
     })
-  }
-
-  private enableCastingFeatures () {
-    if (!this.player) return
-
-    if (this.options.chromecastButton) {
-      // Load the Cast SDK and let the plugin poll for API availability.
-      loadCastSdk()
-
-      if (this.player.chromecast) {
-        this.player.chromecast({
-          addButtonToControlBar: false,
-          buttonPositionIndex: -2,
-          requestTitleFn: () => this.currentLoadOptions?.embedTitle || '',
-          modifyLoadRequestFn: (request: any) => {
-            const castSource = this.getCastSource()
-            if (castSource) {
-              request.media.contentId = castSource.src
-              // Chromecast is picky about HLS mime types and segment formats
-              if (castSource.type === 'application/x-mpegURL') {
-                request.media.contentType = 'application/vnd.apple.mpegurl'
-
-                const media = request.media as any
-                const chromeAny = (window as any).chrome
-                const hlsSegmentFormat = chromeAny?.cast?.media?.HlsSegmentFormat
-                const hlsVideoSegmentFormat = chromeAny?.cast?.media?.HlsVideoSegmentFormat
-
-                if (hlsSegmentFormat?.TS) media.hlsSegmentFormat = hlsSegmentFormat.TS
-                if (hlsVideoSegmentFormat?.TS) media.hlsVideoSegmentFormat = hlsVideoSegmentFormat.TS
-              } else {
-                request.media.contentType = castSource.type
-              }
-            }
-
-            if (this.currentLoadOptions?.isLive) {
-              try {
-                // Ensure Live stream type for Chromecast
-                request.media.streamType = (window as any)?.chrome?.cast?.media?.StreamType?.LIVE ?? request.media.streamType
-              } catch {}
-            }
-
-            if ((window as any)?.console?.debug) {
-              console.debug('Chromecast load request', {
-                contentId: request?.media?.contentId,
-                contentType: request?.media?.contentType,
-                streamType: request?.media?.streamType,
-                hlsSegmentFormat: (request as any)?.media?.hlsSegmentFormat,
-                hlsVideoSegmentFormat: (request as any)?.media?.hlsVideoSegmentFormat
-              })
-            }
-
-            return request
-          }
-        })
-      }
-    }
-
-    // Some techs (Chromecast) don't implement seeking; guard to avoid Video.js errors
-    const ensureTechSeeking = () => {
-      const tech = this.player?.tech(true) as any
-      const legacyTech = (this.player as any)?.tech_ as any
-      if (tech && typeof tech.seeking !== 'function') tech.seeking = () => false
-      if (legacyTech && typeof legacyTech.seeking !== 'function') legacyTech.seeking = () => false
-    }
-
-    ensureTechSeeking()
-    this.player.on('techchange', () => ensureTechSeeking())
-
-    if (this.options.airPlayButton && this.player.airPlay) {
-      this.player.airPlay({
-        addButtonToControlBar: false,
-        buttonPositionIndex: -2
-      })
-    }
-  }
-
-  private getCastSource () {
-    if (this.currentLoadOptions?.isLive) {
-      const liveHlsUrl = this.currentLoadOptions?.hls?.playlistUrl
-      if (liveHlsUrl) return { src: liveHlsUrl, type: 'application/x-mpegURL' }
-    }
-
-    const files = this.currentLoadOptions?.castVideoFiles || []
-    if (files.length > 0) {
-      const sorted = [ ...files ].sort((a, b) => (a.resolution?.id || 0) - (b.resolution?.id || 0))
-      const file = sorted[sorted.length - 1]
-
-      if (file?.fileUrl) {
-        return { src: file.fileUrl, type: 'video/mp4' }
-      }
-    }
-
-    const hlsUrl = this.currentLoadOptions?.hls?.playlistUrl
-    if (hlsUrl) return { src: hlsUrl, type: 'application/x-mpegURL' }
-
-    return null
   }
 
   private disposeDynamicPluginsIfNeeded () {
@@ -531,8 +421,6 @@ export class PeerTubePlayer {
       nativeTextTracks: false
     }
 
-    const enableChromecast = this.options.chromecastButton
-
     const plugins: VideoJSPluginOptions = {
       peertube: {
         hasAutoplay: () => this.getAutoPlayValue(this.currentLoadOptions.autoplay),
@@ -576,8 +464,6 @@ export class PeerTubePlayer {
       embedUrl: () => this.currentLoadOptions.embedUrl,
       eventMarkersToggleButton: () => this.options.eventMarkersToggleButton(),
       eventMarkersToggleButtonDefaultHidden: () => this.options.eventMarkersToggleButtonDefaultHidden?.() ?? false,
-      chromecastButton: () => this.options.chromecastButton,
-      airPlayButton: () => this.options.airPlayButton,
 
       nextVideo: () => this.currentLoadOptions.nextVideo,
       previousVideo: () => this.currentLoadOptions.previousVideo
@@ -599,8 +485,6 @@ export class PeerTubePlayer {
 
       poster: this.currentLoadOptions.poster,
       preload: 'none' as 'none',
-
-      techOrder: enableChromecast ? [ 'chromecast', 'html5' ] : undefined,
 
       inactivityTimeout: this.options.inactivityTimeout,
       playbackRates: [ 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2 ],

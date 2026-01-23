@@ -116,12 +116,6 @@ importers:
       '@peertube/peertube-typescript-utils':
         specifier: workspace:*
         version: link:packages/typescript-utils
-      '@silvermine/videojs-airplay':
-        specifier: ^1.3.0
-        version: 1.3.0(video.js@8.23.4(patch_hash=66459642658d85da52b45ff0472242e9daade1ff3dd765974103db72a7c55377))
-      '@silvermine/videojs-chromecast':
-        specifier: ^1.5.0
-        version: 1.5.0(video.js@8.23.4(patch_hash=66459642658d85da52b45ff0472242e9daade1ff3dd765974103db72a7c55377))
       '@smithy/node-http-handler':
         specifier: ^4.4.5
         version: 4.4.5
@@ -3128,7 +3122,6 @@ packages:
 
   '@primeng/themes@19.1.4':
     resolution: {integrity: sha512-Hze5bBTjsLzZXb20qsm9apsFuzpZzXiU+Ulj/7R+2fwMmcQk0XpkQS7V88fsFw6xsTD7+R+hgqr7Rzy0Gf+4dw==}
-    deprecated: 'Deprecated. This package is no longer maintained. Please migrate to @primeuix/themes: https://www.npmjs.com/package/@primeuix/themes'
 
   '@primeuix/styled@0.3.2':
     resolution: {integrity: sha512-ColZes0+/WKqH4ob2x8DyNYf1NENpe5ZguOvx5yCLxaP8EIMVhLjWLO/3umJiDnQU4XXMLkn2mMHHw+fhTX/mw==}
@@ -3424,16 +3417,6 @@ packages:
   '@silentbot1/nat-api@0.4.8':
     resolution: {integrity: sha512-DBz/1gGzaYIbUdGTBQ7l4NrI7a+DFZgdZShmjmBGgJR4PvQ64wKNMwle2rrW8pdiOesN+DV6/8ZN/PLuksNyTg==}
     engines: {node: '>=10.0.0'}
-
-  '@silvermine/videojs-airplay@1.3.0':
-    resolution: {integrity: sha512-Oxq31DIEuKVt0qLj8/n5aaC9RRAc0hryarPVD9SFxPwCQ3A9Ef7bkRkGJz2i7XQxpIhPQ4SkM9BudUj6oHsPzA==}
-    peerDependencies:
-      video.js: '>= 6.0.0'
-
-  '@silvermine/videojs-chromecast@1.5.0':
-    resolution: {integrity: sha512-oDWu0WT6NORWqpUHf5xg+GoLlxA/YV7guNDOGsDV51gOqYiKb2HoPXodDfhdzwHczUmPFmbyPwfSC1E+etAOmQ==}
-    peerDependencies:
-      video.js: '>= 6 < 9'
 
   '@sinclair/typebox@0.34.41':
     resolution: {integrity: sha512-6gS8pZzSXdyRHTIqoqSVknxolr1kzfy4/CeDnrzsVz8TTIWUbOBr6gnzOmTYJ3eXQNh4IYHIGi5aIL7sOZ2G/g==}
@@ -9935,12 +9918,10 @@ packages:
   tar@6.2.1:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
-    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   tar@7.5.2:
     resolution: {integrity: sha512-7NyxrTE4Anh8km8iEy7o0QYPs+0JKBTj5ZaqHg6B39erLg0qYXN3BijtShwbsNSvQ+LN75+KV+C4QR/f6Gwnpg==}
     engines: {node: '>=18'}
-    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   teex@1.0.1:
     resolution: {integrity: sha512-eYE6iEI62Ni1H8oIa7KlDU6uQBtqr4Eajni3wX7rpfXD8ysFx8z0+dri+KWEPWpBsxXfxu58x/0jvTVT1ekOSg==}
@@ -10622,10 +10603,6 @@ packages:
     resolution: {integrity: sha512-QW95TCTaHmsYfHDybGMwO5IJIM93I/6vTRk+daHTWFPhwh+C8Cg7j7XyKrwrj8Ib6vYXe0ocYNrmzY4xAAN6ug==}
     engines: {node: '>= 14'}
 
-  webcomponents.js@https://codeload.github.com/webcomponents/webcomponentsjs/tar.gz/8a2e40557b177e2cca0def2553f84c8269c8f93e:
-    resolution: {tarball: https://codeload.github.com/webcomponents/webcomponentsjs/tar.gz/8a2e40557b177e2cca0def2553f84c8269c8f93e}
-    version: 0.7.24
-
   webdriver@9.20.0:
     resolution: {integrity: sha512-Kk+AGV1xWLNHVpzUynQJDULMzbcO3IjXo3s0BzfC30OpGxhpaNmoazMQodhtv0Lp242Mb1VYXD89dCb4oAHc4w==}
     engines: {node: '>=18.20.0'}
@@ -10660,7 +10637,6 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
-    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-fetch@3.6.20:
     resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
@@ -13670,15 +13646,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
     optional: true
-
-  '@silvermine/videojs-airplay@1.3.0(video.js@8.23.4(patch_hash=66459642658d85da52b45ff0472242e9daade1ff3dd765974103db72a7c55377))':
-    dependencies:
-      video.js: 8.23.4(patch_hash=66459642658d85da52b45ff0472242e9daade1ff3dd765974103db72a7c55377)
-
-  '@silvermine/videojs-chromecast@1.5.0(video.js@8.23.4(patch_hash=66459642658d85da52b45ff0472242e9daade1ff3dd765974103db72a7c55377))':
-    dependencies:
-      video.js: 8.23.4(patch_hash=66459642658d85da52b45ff0472242e9daade1ff3dd765974103db72a7c55377)
-      webcomponents.js: https://codeload.github.com/webcomponents/webcomponentsjs/tar.gz/8a2e40557b177e2cca0def2553f84c8269c8f93e
 
   '@sinclair/typebox@0.34.41': {}
 
@@ -22525,8 +22492,6 @@ snapshots:
   web-streams-polyfill@3.3.3: {}
 
   web-streams-polyfill@4.0.0-beta.3: {}
-
-  webcomponents.js@https://codeload.github.com/webcomponents/webcomponentsjs/tar.gz/8a2e40557b177e2cca0def2553f84c8269c8f93e: {}
 
   webdriver@9.20.0(bufferutil@4.0.9)(utf-8-validate@6.0.5):
     dependencies:

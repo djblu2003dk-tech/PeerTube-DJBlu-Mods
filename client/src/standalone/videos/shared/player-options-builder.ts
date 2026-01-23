@@ -218,8 +218,6 @@ export class PlayerOptionsBuilder {
 
       theaterButton: false,
       popoutButton: true,
-      chromecastButton: true,
-      airPlayButton: true,
       eventMarkersToggleButton: () => true,
       eventMarkersToggleButtonDefaultHidden: () => true,
       contextMenu: this.contextMenu,
@@ -311,7 +309,6 @@ export class PlayerOptionsBuilder {
       videoChapters: chapters,
       videoEventMarkers: eventMarkersResult.markers,
       videoEventMarkersLiveStartAt: eventMarkersResult.liveStartAt,
-      castVideoFiles: video.files,
 
       startTime: playlist
         ? playlist.playlistTracker.getCurrentElement().startTimestamp

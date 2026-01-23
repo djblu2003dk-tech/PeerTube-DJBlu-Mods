@@ -859,8 +859,6 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
 
       theaterButton: true,
       popoutButton: true,
-      chromecastButton: true,
-      airPlayButton: true,
       eventMarkersToggleButton: () => false,
       eventMarkersToggleButtonDefaultHidden: () => false,
       contextMenu: true,
@@ -1049,7 +1047,6 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
       videoEventMarkers,
       videoEventMarkersLiveStartAt,
       storyboard,
-      castVideoFiles: video.files,
 
       videoShortUUID: video.shortUUID,
       videoUUID: video.uuid,
