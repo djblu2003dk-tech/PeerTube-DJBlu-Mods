@@ -348,6 +348,12 @@ export class PeerTubePlayer {
       }
     }
 
+    // Some techs (Chromecast) don't implement seeking; guard to avoid Video.js errors
+    const tech = this.player.tech(true) as any
+    if (tech && typeof tech.seeking !== 'function') {
+      tech.seeking = () => false
+    }
+
     if (this.options.airPlayButton && this.player.airPlay) {
       this.player.airPlay({
         addButtonToControlBar: false,
