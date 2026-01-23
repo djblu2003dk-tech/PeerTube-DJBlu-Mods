@@ -312,6 +312,13 @@ export class PeerTubePlayer {
               request.media.contentType = castSource.type
             }
 
+            if (this.currentLoadOptions?.isLive) {
+              try {
+                // Ensure Live stream type for Chromecast
+                request.media.streamType = (window as any)?.chrome?.cast?.media?.StreamType?.LIVE ?? request.media.streamType
+              } catch {}
+            }
+
             return request
           }
         })
@@ -329,7 +336,11 @@ export class PeerTubePlayer {
   private getCastSource () {
     if (this.currentLoadOptions?.isLive) {
       const liveHlsUrl = this.currentLoadOptions?.hls?.playlistUrl
-      if (liveHlsUrl) return { src: liveHlsUrl, type: 'application/x-mpegURL' }
+      if (liveHlsUrl) {
+        // Prefer a variant playlist when possible to avoid Chromecast issues with master/audio groups
+        const variantUrl = liveHlsUrl.replace(/master\.m3u8$/i, '1.m3u8')
+        return { src: variantUrl, type: 'application/x-mpegURL' }
+      }
     }
 
     const files = this.currentLoadOptions?.castVideoFiles || []
