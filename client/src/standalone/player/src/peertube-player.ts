@@ -141,6 +141,7 @@ export class PeerTubePlayer {
     }
 
     this.updateLiveDvrClass()
+    this.updateVodControlBarClass()
     this.ensureLiveDvrControls()
 
     this.player.trigger('video-change')
@@ -542,6 +543,16 @@ export class PeerTubePlayer {
 
     if (this.currentLoadOptions.isLive && this.currentLoadOptions.isLiveDvr) {
       this.player.addClass('vjs-live-dvr')
+    }
+  }
+
+  private updateVodControlBarClass () {
+    if (!this.player) return
+
+    this.player.removeClass('vjs-vod-live-controls')
+
+    if (!this.currentLoadOptions.isLive) {
+      this.player.addClass('vjs-vod-live-controls')
     }
   }
 
