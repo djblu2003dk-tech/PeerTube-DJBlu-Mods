@@ -16,7 +16,7 @@ window.addEventListener('load', async () => {
     ? `/video-playlists/embed/${elementId}?api=1`
     : `/videos/embed/${elementId}?api=1&waitPasswordFromEmbedAPI=1`
 
-  iframe.sandbox.add('allow-same-origin', 'allow-scripts', 'allow-popups', 'allow-forms')
+iframe.sandbox.add('allow-same-origin', 'allow-scripts', 'allow-popups', 'allow-forms', 'allow-presentation')
 
   const mainElement = document.querySelector('#host')
   mainElement.appendChild(iframe)
