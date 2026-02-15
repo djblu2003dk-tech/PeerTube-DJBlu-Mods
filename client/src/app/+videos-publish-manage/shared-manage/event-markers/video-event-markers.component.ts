@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { RouterLink } from '@angular/router'
 import { VideoEventMarker, VideoEventMarkerType } from '@peertube/peertube-models'
 import { VideoEventMarkerService } from '@app/shared/shared-main/video/video-event-marker.service'
 import { TimestampInputComponent } from '../../../shared/shared-forms/timestamp-input.component'
@@ -20,7 +19,6 @@ import { TimeDurationFormatterPipe } from '../../../shared/shared-main/date/time
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
     TimestampInputComponent,
     DeleteButtonComponent,
     TimeDurationFormatterPipe
@@ -46,11 +44,6 @@ export class VideoEventMarkersComponent implements OnInit {
     { id: 'yellow-card', label: $localize`Yellow card` },
     { id: 'full-time', label: $localize`Full-time` }
   ]
-
-  get adminEditorLink () {
-    if (!this.videoEdit) return null
-    return [ '/videos/event-markers', this.videoEdit.getVideoAttributes().uuid ]
-  }
 
   ngOnInit () {
     const { videoEdit } = this.manageController.getStore()

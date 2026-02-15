@@ -224,7 +224,6 @@ class ServerConfigManager {
         enabled: CONFIG.LIVE.ENABLED,
 
         allowReplay: CONFIG.LIVE.ALLOW_REPLAY,
-        dvrMaxWindowSeconds: CONFIG.LIVE.DVR_MAX_WINDOW_SECONDS,
         latencySetting: {
           enabled: CONFIG.LIVE.LATENCY_SETTING.ENABLED
         },

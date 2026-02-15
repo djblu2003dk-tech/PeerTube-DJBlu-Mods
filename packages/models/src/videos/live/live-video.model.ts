@@ -14,7 +14,6 @@ export interface LiveVideo {
   permanentLive: boolean
   latencyMode: LiveVideoLatencyModeType
   dvrEnabled: boolean
-  dvrWindowSeconds: number
 
   schedules: LiveVideoScheduleEdit[]
 }

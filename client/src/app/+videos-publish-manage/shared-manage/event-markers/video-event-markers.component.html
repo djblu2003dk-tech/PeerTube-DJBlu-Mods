@@ -1,10 +1,5 @@
 <div class="video-manage-page">
   <div class="pt-title" i18n>Event markers</div>
-  @if (adminEditorLink) {
-    <div class="event-marker-admin-link">
-      <a [routerLink]="adminEditorLink" class="button-link" i18n>Open advanced editor</a>
-    </div>
-  }
 
   <div class="event-marker-form">
     <div class="event-marker-row">
@@ -43,7 +38,7 @@
             <span class="event-marker-label">{{ marker.label }}</span>
           }
         </div>
-        <my-delete-button (click)="deleteMarker(marker)"></my-delete-button>
+        <my-delete-button (onDelete)="deleteMarker(marker)"></my-delete-button>
       </div>
     }
   </div>

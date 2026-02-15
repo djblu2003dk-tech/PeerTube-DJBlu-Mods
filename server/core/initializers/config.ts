@@ -70,33 +70,6 @@ const CONFIG = {
     FROM_ADDRESS: config.get<string>('smtp.from_address')
   },
 
-  API_FOOTBALL: {
-    get ENABLED () {
-      return config.get<boolean>('api_football.enabled')
-    },
-    get KEY () {
-      return config.get<string>('api_football.key')
-    },
-    get BASE_URL () {
-      return config.get<string>('api_football.base_url')
-    },
-    get POLL_INTERVAL () {
-      return parseDurationToMs(config.get<string>('api_football.poll_interval'))
-    }
-  },
-
-  API_THESPORTSDB: {
-    get ENABLED () {
-      return config.get<boolean>('api_thesportsdb.enabled')
-    },
-    get KEY () {
-      return config.get<string>('api_thesportsdb.key')
-    },
-    get BASE_URL () {
-      return config.get<string>('api_thesportsdb.base_url')
-    }
-  },
-
   NSFW_FLAGS_SETTINGS: {
     ENABLED: config.get<boolean>('nsfw_flags_settings.enabled')
   },
@@ -685,9 +658,6 @@ const CONFIG = {
 
     get ALLOW_REPLAY () {
       return config.get<boolean>('live.allow_replay')
-    },
-    get DVR_MAX_WINDOW_SECONDS () {
-      return config.get<number>('live.dvr_max_window_seconds')
     },
 
     LATENCY_SETTING: {

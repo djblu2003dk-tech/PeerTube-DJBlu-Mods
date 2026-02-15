@@ -7,7 +7,6 @@ export interface LiveVideoCreate extends VideoCreate {
   permanentLive?: boolean
   latencyMode?: LiveVideoLatencyModeType
   dvrEnabled?: boolean
-  dvrWindowSeconds?: number
 
   saveReplay?: boolean
   replaySettings?: { privacy: VideoPrivacyType }

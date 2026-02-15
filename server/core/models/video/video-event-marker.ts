@@ -19,8 +19,7 @@ import { VideoModel } from './video.js'
   tableName: 'videoEventMarker',
   indexes: [
     { fields: [ 'videoId' ] },
-    { fields: [ 'videoId', 'timecode' ] },
-    { fields: [ 'externalSource', 'externalId' ] }
+    { fields: [ 'videoId', 'timecode' ] }
   ]
 })
 export class VideoEventMarkerModel extends SequelizeModel<VideoEventMarkerModel> {
@@ -41,14 +40,6 @@ export class VideoEventMarkerModel extends SequelizeModel<VideoEventMarkerModel>
   @AllowNull(true)
   @Column(DataType.STRING(200))
   declare label: string
-
-  @AllowNull(true)
-  @Column(DataType.STRING(32))
-  declare externalSource: string
-
-  @AllowNull(true)
-  @Column(DataType.STRING(200))
-  declare externalId: string
 
   @ForeignKey(() => VideoModel)
   @Column
@@ -71,16 +62,6 @@ export class VideoEventMarkerModel extends SequelizeModel<VideoEventMarkerModel>
     }
 
     return VideoEventMarkerModel.findAll<MVideoEventMarker>(query)
-  }
-
-  static async listMarkersByExternal (options: { videoId: number, externalSource: string, transaction?: Transaction }) {
-    const { videoId, externalSource, transaction } = options
-
-    return VideoEventMarkerModel.findAll<MVideoEventMarker>({
-      where: { videoId, externalSource },
-      order: [ [ 'timecode', 'ASC' ], [ 'id', 'ASC' ] ],
-      transaction
-    })
   }
 
   static async deleteMarker (options: { id: number, videoId: number, transaction?: Transaction }) {

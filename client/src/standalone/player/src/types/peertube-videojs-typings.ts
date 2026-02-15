@@ -218,7 +218,7 @@ export type CastSource = {
 
 export type ChromecastButtonOptions = {
   isDisplayed: () => boolean
-  getCastSource: () => Promise<CastSource | null> | CastSource | null
+  getCastSource: () => CastSource | null
   getCastTitle: () => string
   getCastPoster: () => string
 }

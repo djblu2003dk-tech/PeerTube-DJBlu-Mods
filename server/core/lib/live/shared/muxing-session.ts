@@ -544,7 +544,7 @@ class MuxingSession extends EventEmitter implements MuxingSession {
       hasVideo: this.hasVideo,
       probe: this.probe,
 
-      segmentListSize: getLiveSegmentListSize(this.videoLive.latencyMode, this.videoLive.dvrEnabled, this.videoLive.dvrWindowSeconds),
+      segmentListSize: getLiveSegmentListSize(this.videoLive.latencyMode, this.videoLive.dvrEnabled),
       segmentDuration: getLiveSegmentTime(this.videoLive.latencyMode),
 
       outDirectory: this.outDirectory

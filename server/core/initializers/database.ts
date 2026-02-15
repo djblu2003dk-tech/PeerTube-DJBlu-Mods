@@ -24,7 +24,6 @@ import { VideoChannelCollaboratorModel } from '@server/models/video/video-channe
 import { VideoChannelSyncModel } from '@server/models/video/video-channel-sync.js'
 import { VideoChapterModel } from '@server/models/video/video-chapter.js'
 import { VideoEventMarkerModel } from '@server/models/video/video-event-marker.js'
-import { VideoEventMarkerSyncModel } from '@server/models/video/video-event-marker-sync.js'
 import { VideoJobInfoModel } from '@server/models/video/video-job-info.js'
 import { VideoLiveReplaySettingModel } from '@server/models/video/video-live-replay-setting.js'
 import { VideoLiveScheduleModel } from '@server/models/video/video-live-schedule.js'
@@ -155,7 +154,6 @@ export async function initDatabaseModels (silent: boolean) {
     VideoChannelActivityModel,
     VideoChapterModel,
     VideoEventMarkerModel,
-    VideoEventMarkerSyncModel,
     VideoCaptionModel,
     VideoBlacklistModel,
     VideoTagModel,
