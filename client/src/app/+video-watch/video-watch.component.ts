@@ -859,7 +859,7 @@ export class VideoWatchComponent implements OnInit, OnDestroy {
 
       theaterButton: true,
       popoutButton: true,
-      eventMarkersToggleButton: () => true,
+      eventMarkersToggleButton: () => false,
       eventMarkersToggleButtonDefaultHidden: () => false,
       contextMenu: true,
       chromecastButton: true,

@@ -645,11 +645,6 @@ $event-marker-size: 14px;
   .vjs-peertube-link {
     font-weight: $font-semibold;
   }
-
-  // Hide P2P bandwidth/peers display in control bar (VOD + live)
-  .vjs-peertube {
-    display: none !important;
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -803,24 +798,6 @@ $event-marker-size: 14px;
 
 .video-js.vjs-peertube-theme-lucide.vjs-size-570 .vjs-control-bar {
   --first-last-element-margin: 10px;
-}
-
-// Use the live-style single-line control bar layout for VOD
-.video-js.vjs-vod-live-controls .vjs-control-bar {
-  .vjs-progress-control {
-    position: static;
-    top: auto;
-    width: auto;
-    height: auto;
-    flex: 1 1 auto;
-    align-items: center;
-    margin: 0 10px;
-  }
-
-  .vjs-progress-control .vjs-slider {
-    margin: 0;
-    height: $slider-height;
-  }
 }
 
 // ---------------------------------------------------------------------------
