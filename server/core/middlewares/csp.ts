@@ -8,7 +8,7 @@ const baseDirectives = Object.assign({},
     mediaSrc: [ '\'self\'', 'https:', 'blob:' ],
     fontSrc: [ '\'self\'', 'data:' ],
     imgSrc: [ '\'self\'', 'data:', 'blob:' ],
-    scriptSrc: [ '\'self\' \'unsafe-inline\' \'unsafe-eval\'', 'blob:' ],
+    scriptSrc: [ '\'self\' \'unsafe-inline\' \'unsafe-eval\'', 'blob:', 'https://www.gstatic.com' ],
     scriptSrcAttr: [ '\'unsafe-inline\'' ],
     styleSrc: [ '\'self\' \'unsafe-inline\'' ],
     objectSrc: [ '\'none\'' ], // only define to allow plugins, else let defaultSrc 'none' block it

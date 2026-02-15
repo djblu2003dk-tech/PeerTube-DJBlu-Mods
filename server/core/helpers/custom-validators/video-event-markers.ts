@@ -22,6 +22,13 @@ export function isEventMarkerLabelValid (value: any) {
   return true
 }
 
+export function isEventMarkerExternalIdValid (value: any) {
+  if (!exists(value)) return true
+  if (typeof value !== 'string') return false
+  if (value.length > 200) return false
+  return true
+}
+
 export function areEventMarkersValid (markers: any) {
   if (!isArray(markers)) return false
 

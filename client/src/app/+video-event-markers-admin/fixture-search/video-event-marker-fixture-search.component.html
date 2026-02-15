@@ -1,0 +1,92 @@
+<div class="fixture-search-page">
+  <div class="pt-title" i18n>Fixture lookup</div>
+
+  <div class="fixture-search-form">
+    <label i18n>Team name</label>
+    <div class="fixture-search-inputs">
+      <input class="form-control" [(ngModel)]="searchQuery" type="text" placeholder="e.g. Arsenal" i18n-placeholder />
+      <input class="form-control" [(ngModel)]="season" type="number" min="2000" max="2100" placeholder="Season" i18n-placeholder (ngModelChange)="onSeasonChange()" />
+      <button class="btn btn-primary" type="button" (click)="searchTeams()" [disabled]="loadingTeams" i18n>Search</button>
+    </div>
+    <div class="fixture-search-inputs">
+      <input class="form-control" [(ngModel)]="fromDate" type="date" i18n-placeholder placeholder="From" />
+      <input class="form-control" [(ngModel)]="toDate" type="date" i18n-placeholder placeholder="To" />
+    </div>
+  </div>
+
+  @if (loadingTeams) {
+    <div class="fixture-search-status" i18n>Searching teams…</div>
+  } @else if (teams.length > 0) {
+    <div class="fixture-team-list">
+      @for (team of teams; track team.id) {
+        <button class="btn btn-secondary" type="button" (click)="selectTeam(team)">
+          {{ team.name }} @if (team.country) { <span class="fixture-team-country">({{ team.country }})</span> }
+        </button>
+      }
+    </div>
+  }
+
+  @if (selectedTeam) {
+    <div class="fixture-selected">
+      <div class="fixture-selected-title">
+        <span i18n>Selected team:</span> {{ selectedTeam.name }}
+      </div>
+      <button class="btn btn-secondary" type="button" (click)="fetchFixtures()" [disabled]="loadingFixtures" i18n>Refresh fixtures</button>
+    </div>
+  }
+
+  @if (loadingFixtures) {
+    <div class="fixture-search-status" i18n>Loading fixtures…</div>
+  } @else if (selectedTeam) {
+    <div class="fixture-results">
+      <div class="fixture-section">
+        <div class="fixture-section-title" i18n>Upcoming fixtures</div>
+        @if (upcoming.length === 0) {
+          <div class="fixture-empty" i18n>No upcoming fixtures found.</div>
+        } @else {
+          @for (fixture of upcoming; track fixture.id) {
+            <div class="fixture-row">
+              <div class="fixture-main">
+                <div class="fixture-teams">{{ fixture.teams?.home?.name }} vs {{ fixture.teams?.away?.name }}</div>
+                <div class="fixture-meta">
+                  <span>{{ fixture.league?.name }}</span>
+                  <span>·</span>
+                  <span>{{ fixture.date | date:'medium' }}</span>
+                </div>
+              </div>
+              <div class="fixture-actions">
+                <span class="fixture-id">#{{ fixture.id }}</span>
+                <button class="btn btn-secondary" type="button" (click)="copyFixtureId(fixture.id)" i18n>Copy ID</button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="fixture-section">
+        <div class="fixture-section-title" i18n>Recent fixtures</div>
+        @if (recent.length === 0) {
+          <div class="fixture-empty" i18n>No recent fixtures found.</div>
+        } @else {
+          @for (fixture of recent; track fixture.id) {
+            <div class="fixture-row">
+              <div class="fixture-main">
+                <div class="fixture-teams">{{ fixture.teams?.home?.name }} vs {{ fixture.teams?.away?.name }}</div>
+                <div class="fixture-meta">
+                  <span>{{ fixture.league?.name }}</span>
+                  <span>·</span>
+                  <span>{{ fixture.date | date:'medium' }}</span>
+                  @if (fixture.status?.short) { <span>· {{ fixture.status?.short }}</span> }
+                </div>
+              </div>
+              <div class="fixture-actions">
+                <span class="fixture-id">#{{ fixture.id }}</span>
+                <button class="btn btn-secondary" type="button" (click)="copyFixtureId(fixture.id)" i18n>Copy ID</button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>

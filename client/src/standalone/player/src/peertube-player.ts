@@ -2,6 +2,7 @@ import { buildVideoLink, decorateVideoLink, isDefaultLocale, pick } from '@peert
 import { logger } from '@root-helpers/logger'
 import { PluginsManager } from '@root-helpers/plugins-manager'
 import { TranslationsManager } from '@root-helpers/translations-manager'
+import { isSameOrigin } from '@root-helpers/url'
 import { copyToClipboard } from '@root-helpers/utils'
 import { buildVideoOrPlaylistEmbed } from '@root-helpers/video'
 import { isMobile } from '@root-helpers/web-browser'
@@ -283,26 +284,107 @@ export class PeerTubePlayer {
   }
 
 
-  private getCastSource () {
+  private async getCastSource () {
     if (this.currentLoadOptions?.isLive) {
       const liveHlsUrl = this.currentLoadOptions?.hls?.playlistUrl
-      if (liveHlsUrl) return { src: liveHlsUrl, type: 'application/vnd.apple.mpegurl', isLive: true }
+      if (liveHlsUrl) {
+        const liveFiles = this.currentLoadOptions?.hls?.videoFiles || []
+        const preferred = this.pickCastFileForChromecast(liveFiles, false)
+        const targetHeight = preferred?.resolution?.id
+
+        if (targetHeight) {
+          const variantUrl = await this.resolveHlsVariantUrl(liveHlsUrl, targetHeight)
+          if (variantUrl) return { src: variantUrl, type: 'application/vnd.apple.mpegurl', isLive: true }
+        }
+
+        return { src: liveHlsUrl, type: 'application/vnd.apple.mpegurl', isLive: true }
+      }
     }
 
     const files = this.currentLoadOptions?.castVideoFiles || []
-    if (files.length > 0) {
-      const sorted = [ ...files ].sort((a, b) => (a.resolution?.id || 0) - (b.resolution?.id || 0))
-      const file = sorted[sorted.length - 1]
-
-      if (file?.fileUrl) {
-        return { src: file.fileUrl, type: 'video/mp4', isLive: false }
-      }
-    }
+    const preferred = this.pickCastFileForChromecast(files, true)
+    if (preferred?.fileUrl) return { src: preferred.fileUrl, type: 'video/mp4', isLive: false }
 
     const hlsUrl = this.currentLoadOptions?.hls?.playlistUrl
     if (hlsUrl) return { src: hlsUrl, type: 'application/vnd.apple.mpegurl', isLive: false }
 
     return null
+  }
+
+  private pickCastFileForChromecast (files: any[], requireUrl: boolean) {
+    const candidates = (files || []).filter(f => {
+      if (!f || f.hasVideo === false) return false
+      if (requireUrl && !f.fileUrl) return false
+      return true
+    })
+
+    if (candidates.length === 0) return null
+
+    const fpsCap = 30
+    const hasHighFps = candidates.some(f => (f.fps ?? 0) > fpsCap)
+
+    const eligible1080 = candidates.filter(f => (f.fps ?? 0) <= fpsCap && (f.resolution?.id ?? 0) <= 1080)
+    if (eligible1080.length > 0) return this.pickHighestResolution(eligible1080)
+
+    if (hasHighFps) {
+      const eligible720 = candidates.filter(f => (f.resolution?.id ?? 0) <= 720)
+      if (eligible720.length > 0) return this.pickHighestResolution(eligible720)
+    }
+
+    return this.pickHighestResolution(candidates)
+  }
+
+  private pickHighestResolution (files: any[]) {
+    const sorted = [ ...files ].sort((a, b) => (a.resolution?.id || 0) - (b.resolution?.id || 0))
+    return sorted[sorted.length - 1] || null
+  }
+
+  private async resolveHlsVariantUrl (masterUrl: string, targetHeight: number) {
+    try {
+      const headers = new Headers()
+      if (isSameOrigin(this.options.serverUrl, masterUrl)) {
+        if (this.currentLoadOptions?.requiresPassword) {
+          headers.set('x-peertube-video-password', this.currentLoadOptions.videoPassword())
+        } else if (this.currentLoadOptions?.requiresUserAuth) {
+          headers.set('Authorization', this.options.authorizationHeader())
+        }
+      }
+
+      const res = await fetch(masterUrl, { headers })
+      if (!res.ok) return null
+
+      const text = await res.text()
+      const lines = text.split(/\r?\n/)
+
+      const variants: Array<{ height: number, uri: string }> = []
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        if (!line.startsWith('#EXT-X-STREAM-INF')) continue
+
+        const resolutionMatch = line.match(/RESOLUTION=(\\d+)x(\\d+)/i)
+        if (!resolutionMatch) continue
+
+        const height = parseInt(resolutionMatch[2], 10)
+        const uri = lines[i + 1]
+        if (!uri || uri.startsWith('#')) continue
+
+        variants.push({ height, uri })
+      }
+
+      if (variants.length === 0) return null
+
+      const withinCap = variants.filter(v => v.height <= targetHeight)
+      const pick = (withinCap.length > 0 ? withinCap : variants)
+        .sort((a, b) => a.height - b.height)
+        .pop()
+
+      if (!pick) return null
+
+      return new URL(pick.uri, masterUrl).toString()
+    } catch (err) {
+      return null
+    }
   }
 
   private disposeDynamicPluginsIfNeeded () {

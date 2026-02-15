@@ -1,0 +1,108 @@
+<div class="event-marker-admin-page">
+  <div class="pt-title" i18n>Event markers</div>
+
+  @if (loading) {
+    <div class="event-marker-status" i18n>Loading video…</div>
+  } @else if (accessError) {
+    <div class="event-marker-status error">{{ accessError }}</div>
+  } @else {
+    <div class="event-marker-meta">
+      <div class="event-marker-title">{{ video.name }}</div>
+      <div class="event-marker-hint" i18n>Live updates every 10 seconds.</div>
+    </div>
+
+    <div class="event-marker-sync">
+      <div class="event-marker-sync-title" i18n>API-Football sync</div>
+      <div class="event-marker-sync-link">
+        <a [routerLink]="fixtureLookupLink" class="button-link" i18n>Find fixture ID</a>
+      </div>
+
+      <div class="event-marker-row">
+        <label i18n>Enable auto sync</label>
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="syncSettings.enabled" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="event-marker-row">
+        <label i18n>Fixture ID</label>
+        <input class="form-control" [(ngModel)]="syncFixtureId" type="text" placeholder="e.g. 123456" />
+      </div>
+
+      <div class="event-marker-row">
+        <label i18n>Kickoff wall time (HH:mm)</label>
+        <input class="form-control" [(ngModel)]="syncKickoffTime" type="text" placeholder="15:00" />
+      </div>
+
+      <div class="event-marker-row">
+        <label i18n>Kickoff timecode</label>
+        <my-timestamp-input [(ngModel)]="syncKickoffTimecode"></my-timestamp-input>
+      </div>
+
+      <div class="event-marker-actions">
+        <button class="btn btn-secondary" type="button" (click)="saveSyncSettings()" i18n>Save sync settings</button>
+      </div>
+
+      <div class="event-marker-sync-status">
+        <div *ngIf="syncSettings?.lastSyncAt" class="event-marker-sync-last" i18n>
+          Last sync: {{ syncSettings.lastSyncAt | date:'short' }}
+        </div>
+        <div *ngIf="syncSettings?.lastError" class="event-marker-sync-error">
+          {{ syncSettings.lastError }}
+        </div>
+      </div>
+    </div>
+
+    <div class="event-marker-form">
+      <div class="event-marker-row">
+        <label i18n>Type</label>
+        <select class="form-control" [(ngModel)]="newMarkerType">
+          @for (t of eventMarkerTypes; track t.id) {
+            <option [value]="t.id">{{ t.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="event-marker-row">
+        <label i18n>Timecode</label>
+        <my-timestamp-input [(ngModel)]="newMarkerTimecode"></my-timestamp-input>
+      </div>
+
+      <div class="event-marker-row">
+        <label i18n>Tooltip</label>
+        <input class="form-control" [(ngModel)]="newMarkerLabel" type="text" i18n-placeholder placeholder="Optional tooltip text" />
+      </div>
+
+      <div class="event-marker-actions">
+        <button class="btn btn-primary" type="button" (click)="addMarker()" i18n>Add marker</button>
+      </div>
+    </div>
+
+    <div class="event-marker-list">
+      @if (markers.length === 0) {
+        <div class="event-marker-empty" i18n>No event markers yet.</div>
+      } @else {
+        <div class="event-marker-item" *ngFor="let marker of markers">
+          <div class="event-marker-item-left">
+            <select class="form-control" [(ngModel)]="marker.type" (ngModelChange)="markDirty(marker)">
+              @for (t of eventMarkerTypes; track t.id) {
+                <option [value]="t.id">{{ t.label }}</option>
+              }
+            </select>
+
+            <my-timestamp-input [(ngModel)]="marker.timecode" (ngModelChange)="markDirty(marker)"></my-timestamp-input>
+
+            <input class="form-control" [(ngModel)]="marker.label" (ngModelChange)="markDirty(marker)" type="text" i18n-placeholder placeholder="Tooltip" />
+          </div>
+
+          <div class="event-marker-item-actions">
+            <button class="btn btn-primary" type="button" [disabled]="!marker.dirty || marker.saving" (click)="saveMarker(marker)" i18n>Save</button>
+            <button class="btn btn-secondary" type="button" [disabled]="!marker.dirty || marker.saving" (click)="resetMarker(marker)" i18n>Reset</button>
+            <my-delete-button (click)="deleteMarker(marker)"></my-delete-button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -38,6 +38,7 @@ class ChromecastButton extends Button {
   private castFramework: CastFramework | null = null
   private chromeCastNamespace: ChromeCastNamespace['cast'] | null = null
   private castListenerRegistered = false
+  private isRequestingSession = false
 
   constructor (player: VideojsPlayer, options: ChromecastButtonOptions & VideojsButtonOptions) {
     super(player, options)
@@ -65,22 +66,20 @@ class ChromecastButton extends Button {
       return
     }
 
-    const source = this.chromecastButtonOptions.getCastSource()
-    if (!source) return
+    if (this.isRequestingSession) return
+    this.isRequestingSession = true
+
+    const source = await this.chromecastButtonOptions.getCastSource()
+    if (!source) {
+      this.isRequestingSession = false
+      return
+    }
 
     try {
       // eslint-disable-next-line no-console
       console.warn('Chromecast button clicked')
 
       const existingSession = (castContext as any).getCurrentSession?.()
-      const receiverId = this.chromeCastNamespace.media.DEFAULT_MEDIA_RECEIVER_APP_ID || 'CC1AD845'
-      const autoJoinPolicy = this.chromeCastNamespace.AutoJoinPolicy?.ORIGIN_SCOPED || 'origin_scoped'
-
-      castContext.setOptions({
-        receiverApplicationId: receiverId,
-        autoJoinPolicy
-      })
-
       if (!existingSession) await castContext.requestSession()
 
       const session = (castContext as any).getCurrentSession?.() || existingSession
@@ -137,6 +136,8 @@ class ChromecastButton extends Button {
         details: (error as any)?.details,
         cause: (error as any)?.cause
       })
+    } finally {
+      this.isRequestingSession = false
     }
   }
 
@@ -177,6 +178,7 @@ class ChromecastButton extends Button {
 
   private updateCastState (castState: string) {
     if (!this.castFramework) return
+    if (!this.el()) return
 
     if (castState === this.castFramework.CastState.NO_DEVICES_AVAILABLE) {
       this.addClass('vjs-hidden')

@@ -3,6 +3,15 @@ import { QueryInterface, DataTypes } from 'sequelize'
 export async function up (utils: { queryInterface: QueryInterface }) {
   const { queryInterface } = utils
 
+  const safeAddIndex = async (table: string, fields: string[]) => {
+    try {
+      await queryInterface.addIndex(table, fields)
+    } catch (err) {
+      if (err?.parent?.code === '42P07') return
+      throw err
+    }
+  }
+
   await queryInterface.createTable('videoEventMarker', {
     id: {
       type: DataTypes.INTEGER,
@@ -41,8 +50,8 @@ export async function up (utils: { queryInterface: QueryInterface }) {
     }
   })
 
-  await queryInterface.addIndex('videoEventMarker', [ 'videoId' ])
-  await queryInterface.addIndex('videoEventMarker', [ 'videoId', 'timecode' ])
+  await safeAddIndex('videoEventMarker', [ 'videoId' ])
+  await safeAddIndex('videoEventMarker', [ 'videoId', 'timecode' ])
 }
 
 export async function down (utils: { queryInterface: QueryInterface }) {

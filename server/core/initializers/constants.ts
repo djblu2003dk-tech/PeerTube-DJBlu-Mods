@@ -58,7 +58,7 @@ import { CONFIG, registerConfigChangedHandler } from './config.js'
 
 // ---------------------------------------------------------------------------
 
-export const LAST_MIGRATION_VERSION = 980
+export const LAST_MIGRATION_VERSION = 992
 
 // ---------------------------------------------------------------------------
 
@@ -368,7 +368,8 @@ export const SCHEDULER_INTERVALS_MS = {
   REMOVE_EXPIRED_USER_EXPORTS: 1000 * 3600, // 1 hour
   UPDATE_INBOX_STATS: 1000 * 60, // 1 minute
   REMOVE_DANGLING_RESUMABLE_UPLOADS: 60000 * 60, // 1 hour
-  CHANNEL_SYNC_CHECK_INTERVAL: CONFIG.IMPORT.VIDEO_CHANNEL_SYNCHRONIZATION.CHECK_INTERVAL
+  CHANNEL_SYNC_CHECK_INTERVAL: CONFIG.IMPORT.VIDEO_CHANNEL_SYNCHRONIZATION.CHECK_INTERVAL,
+  VIDEO_EVENT_MARKER_SYNC: CONFIG.API_FOOTBALL.POLL_INTERVAL
 }
 
 // ---------------------------------------------------------------------------
@@ -387,6 +388,9 @@ export const CONSTRAINTS_FIELDS = {
   ABUSES: {
     REASON: { min: 2, max: 3000 }, // Length
     MODERATION_COMMENT: { min: 2, max: 3000 } // Length
+  },
+  VIDEO_EVENT_MARKER_SYNC_LAST_ERROR: {
+    max: 500
   },
   ABUSE_MESSAGES: {
     MESSAGE: { min: 2, max: 3000 } // Length
@@ -1106,7 +1110,7 @@ export const VIDEO_LIVE = {
     SMALL_LATENCY: 2 // 2 seconds
   },
   SEGMENTS_LIST_SIZE: 15, // 15 maximum segments in live playlist
-  DVR_MAX_WINDOW_SECONDS: 60 * 60 * 2,
+  DVR_MAX_WINDOW_SECONDS: CONFIG.LIVE.DVR_MAX_WINDOW_SECONDS,
   REPLAY_DIRECTORY: 'replay',
   EDGE_LIVE_DELAY_SEGMENTS_NOTIFICATION: 4,
   MAX_SOCKET_WAITING_DATA: 1024 * 1000 * 100, // 100MB

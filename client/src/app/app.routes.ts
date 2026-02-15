@@ -138,6 +138,16 @@ const routes: Routes = [
       }
     }
   },
+  {
+    path: 'videos/event-markers',
+    loadChildren: () => import('./+video-event-markers-admin/routes'),
+    canActivateChild: [ MetaGuard ],
+    data: {
+      meta: {
+        title: $localize`Event markers`
+      }
+    }
+  },
 
   {
     path: 'videos/publish',
